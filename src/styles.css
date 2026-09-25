@@ -33,35 +33,43 @@
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-overlay: var(--overlay);
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --shadow-soft: 0 10px 35px color-mix(in oklab, var(--navy) 7%, transparent);
+  --color-on-dark: var(--on-dark);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --shadow-soft: 0 8px 24px color-mix(in oklab, var(--navy) 8%, transparent);
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.975 0.012 246);
-  --foreground: oklch(0.27 0.035 255);
-  --card: oklch(1 0 0 / 92%);
-  --card-foreground: oklch(0.27 0.035 255);
+  --radius: 0.625rem;
+  --background: oklch(0.975 0.018 106);
+  --foreground: oklch(0.175 0.016 127);
+  --card: oklch(0.92 0.013 104);
+  --card-foreground: oklch(0.175 0.016 127);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.27 0.035 255);
-  --primary: oklch(0.68 0.14 251);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.018 245);
-  --secondary-foreground: oklch(0.27 0.035 255);
-  --muted: oklch(0.96 0.011 248);
-  --muted-foreground: oklch(0.57 0.035 250);
-  --accent: oklch(0.93 0.035 248);
-  --accent-foreground: oklch(0.49 0.14 251);
-  --destructive: oklch(0.7 0.15 25);
+  --popover-foreground: oklch(0.175 0.016 127);
+  --primary: oklch(0.9 0.168 112);
+  --primary-foreground: oklch(0.175 0.016 127);
+  --secondary: oklch(0.22 0.018 128);
+  --secondary-foreground: oklch(0.975 0.018 106);
+  --muted: oklch(0.92 0.013 104);
+  --muted-foreground: oklch(0.44 0.018 116);
+  --accent: oklch(0.95 0.084 111);
+  --accent-foreground: oklch(0.175 0.016 127);
+  --destructive: oklch(0.62 0.18 25);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.9 0.022 248);
-  --input: oklch(0.88 0.025 248);
-  --ring: oklch(0.68 0.14 251);
-  --navy: oklch(0.25 0.055 258);
-  --sidebar: oklch(0.99 0.006 246 / 88%);
-  --sidebar-foreground: oklch(0.27 0.035 255);
-  --overlay: oklch(0.2 0.03 255 / 45%);
+  --border: oklch(0.86 0.015 105);
+  --input: oklch(0.81 0.018 108);
+  --ring: oklch(0.79 0.151 112);
+  --navy: oklch(0.22 0.018 128);
+  --sidebar: oklch(0.22 0.018 128);
+  --sidebar-foreground: oklch(0.975 0.018 106);
+  --overlay: oklch(0.14 0.015 128 / 55%);
+  --on-dark: oklch(0.975 0.018 106);
+  --success: oklch(0.72 0.15 145);
+  --warning: oklch(0.81 0.15 85);
+  --info: oklch(0.82 0.035 215);
 }
 
 @layer base {
@@ -73,25 +81,24 @@
 }
 
 @utility panel {
-  border: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
-  border-radius: 1rem;
+  border: 1px solid color-mix(in oklab, var(--muted-foreground) 22%, transparent);
+  border-radius: 0.75rem;
   background: var(--card);
   box-shadow: var(--shadow-soft);
 }
 
 @utility glass-panel {
-  border: 1px solid color-mix(in oklab, white 78%, transparent);
-  background: linear-gradient(120deg, color-mix(in oklab, white 87%, transparent), color-mix(in oklab, var(--accent) 62%, transparent));
+  border: 1px solid color-mix(in oklab, var(--muted-foreground) 22%, transparent);
+  background: linear-gradient(120deg, var(--card), color-mix(in oklab, var(--info) 52%, var(--card)));
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(20px) saturate(120%);
 }
 
 @utility section-title {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.0625rem;
+  font-weight: 600;
   color: var(--navy);
 }
 
@@ -99,22 +106,22 @@
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  background: var(--accent);
+  background: color-mix(in oklab, var(--primary) 45%, var(--background));
   padding: 0.3rem 0.65rem;
   font-size: 0.72rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--accent-foreground);
 }
 
 @utility metric-card {
   border: 1px solid color-mix(in oklab, var(--border) 45%, transparent);
-  border-radius: 0.85rem;
+  border-radius: 0.75rem;
   box-shadow: none;
 }
-@utility metric-blue { background: linear-gradient(135deg, oklch(0.96 0.025 248), oklch(0.93 0.045 248)); }
-@utility metric-amber { background: linear-gradient(135deg, oklch(0.985 0.012 75), oklch(0.96 0.04 82)); }
-@utility metric-cyan { background: linear-gradient(135deg, oklch(0.97 0.02 225), oklch(0.93 0.045 225)); }
-@utility metric-green { background: linear-gradient(135deg, oklch(0.97 0.02 160), oklch(0.93 0.04 160)); }
+@utility metric-blue { background: color-mix(in oklab, var(--info) 70%, var(--background)); }
+@utility metric-amber { background: color-mix(in oklab, var(--warning) 38%, var(--background)); }
+@utility metric-cyan { background: color-mix(in oklab, var(--info) 48%, var(--background)); }
+@utility metric-green { background: color-mix(in oklab, var(--success) 30%, var(--background)); }
 @utility metric-icon {
   display: grid;
   width: 2.4rem;
@@ -122,7 +129,7 @@
   flex-shrink: 0;
   place-items: center;
   border-radius: 0.65rem;
-  background: color-mix(in oklab, white 70%, transparent);
+  background: color-mix(in oklab, var(--popover) 76%, transparent);
   color: var(--navy);
 }
 @utility data-row {
@@ -142,17 +149,16 @@
   align-items: center;
   gap: 0.25rem;
   border-radius: 999px;
-  background: oklch(0.93 0.045 160);
+  background: color-mix(in oklab, var(--success) 28%, var(--background));
   padding: 0.3rem 0.55rem;
   font-size: 0.7rem;
-  color: oklch(0.42 0.09 160);
+  color: color-mix(in oklab, var(--success) 65%, var(--foreground));
 }
 
 .summary-art {
   background:
-    radial-gradient(circle at 60% 35%, color-mix(in oklab, white 75%, transparent), transparent 27%),
-    repeating-radial-gradient(ellipse at 70% 50%, color-mix(in oklab, var(--primary) 18%, transparent) 0 2px, transparent 3px 26px),
-    linear-gradient(145deg, var(--accent), oklch(0.83 0.085 242));
+    repeating-linear-gradient(90deg, transparent 0 42px, color-mix(in oklab, var(--navy) 8%, transparent) 42px 43px),
+    linear-gradient(145deg, var(--info), color-mix(in oklab, var(--primary) 55%, var(--info)));
 }
 
 @media (prefers-reduced-motion: reduce) {
