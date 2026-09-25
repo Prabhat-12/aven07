@@ -20,8 +20,9 @@ type Tab = "Overview" | "Recent Activity" | "Investigations" | "Care Plan" | "Pr
 type Detail = { kind: "investigation" | "task" | "activity" | "visit"; title: string; subtitle?: string } | null;
 type SimpleModal = "medication" | "investigation" | "task" | "note" | null;
 
+const primaryPatient = { name: "Asha Sharma", id: "SD-00421", phone: "+91 98765 40121", age: 52, gender: "Female", condition: "Type 2 Diabetes", image: ashaImage };
 const patients = [
-  { name: "Asha Sharma", id: "SD-00421", phone: "+91 98765 40121", age: 52, gender: "Female", condition: "Type 2 Diabetes", image: ashaImage },
+  primaryPatient,
   { name: "Rohan Mehta", id: "SD-00387", phone: "+91 98100 93875", age: 46, gender: "Male", condition: "Type 2 Diabetes", image: undefined },
   { name: "Meera Kapoor", id: "SD-00435", phone: "+91 99887 20435", age: 61, gender: "Female", condition: "Type 1 Diabetes", image: undefined },
 ];
@@ -74,7 +75,7 @@ export function AvennDashboard() {
   const [consultStep, setConsultStep] = useState(1);
   const [simpleModal, setSimpleModal] = useState<SimpleModal>(null);
   const [search, setSearch] = useState("");
-  const [currentPatient, setCurrentPatient] = useState(patients[0]);
+  const [currentPatient, setCurrentPatient] = useState(primaryPatient);
   const [mobileNav, setMobileNav] = useState(false);
   const [investigationFilter, setInvestigationFilter] = useState("All");
   const [notes, setNotes] = useState([
