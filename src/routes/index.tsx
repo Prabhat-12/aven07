@@ -4,13 +4,13 @@ import { AvennDashboard } from "@/components/avenn-dashboard";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Asha Sharma — Patient Overview | Avenn" },
-      { name: "description", content: "Avenn patient overview for connected diabetes care, investigations, history, and care planning." },
-      { property: "og:title", content: "Patient Overview | Avenn" },
-      { property: "og:description", content: "A calm, connected doctor workspace for diabetes care continuity." },
+      { title: "Clinical Dashboard | Avenn" },
+      { name: "description", content: "Avenn clinical dashboard for schedules, follow-ups, results, and patient messages." },
+      { property: "og:title", content: "Clinical Dashboard | Avenn" },
+      { property: "og:description", content: "A connected overview of today’s patient care priorities." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: AvennDashboard,
+  component: () => <AvennDashboard initialPage="dashboard" />,
 });
