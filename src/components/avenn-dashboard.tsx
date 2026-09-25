@@ -1,9 +1,11 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Camera, Check, ChevronDown,
   ChevronRight, Circle, ClipboardCheck, Clock3, Copy, FileText, FlaskConical,
   HeartPulse, Home, Info, Menu, MessageSquare, MoreHorizontal, NotebookPen, Pill,
-  Plus, Search, Settings, Stethoscope, UserRound, Users, Weight, X,
+  Plus, Search, Settings, Stethoscope, UserRound, Users, Weight, X, Filter,
+  Send, Paperclip, Phone, Video, Mail, CalendarCheck, AlertCircle, CheckCheck,
 } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,7 @@ import ashaImage from "@/assets/asha-sharma.jpg";
 import priyaImage from "@/assets/priya-sharma.jpg";
 
 type Tab = "Overview" | "Recent Activity" | "Investigations" | "Care Plan" | "Previous Visits" | "Notes";
+export type WorkspacePage = "dashboard" | "patients" | "follow-ups" | "investigations" | "messages";
 type Detail = { kind: "investigation" | "task" | "activity" | "visit"; title: string; subtitle?: string } | null;
 type SimpleModal = "medication" | "investigation" | "task" | "note" | null;
 type Patient = { name: string; id: string; phone: string; age: number; gender: string; condition: string; image?: string };
@@ -64,9 +67,24 @@ const visits = [
   { date: "15 Jun 2026", title: "Follow-up consultation", summary: "HbA1c recorded at 8.1%. Medication adherence reviewed.", actions: ["Metformin continued", "Lifestyle plan discussed"] },
   { date: "10 Mar 2026", title: "Diabetes review", summary: "Quarterly diabetes review and routine examination.", actions: ["Baseline investigations recorded"] },
 ];
+const followUps = [
+  { patient: "Asha Sharma", meta: "52 yrs · Female · UHID: SD-00421", condition: "Type 2 Diabetes", date: "15 Oct 2026", status: "Due this week" },
+  { patient: "Raj Mehta", meta: "46 yrs · Male · UHID: SD-00876", condition: "Type 2 Diabetes", date: "14 Oct 2026", status: "Due this week" },
+  { patient: "Neha Gupta", meta: "58 yrs · Female · UHID: SD-00312", condition: "Type 2 Diabetes", date: "12 Sep 2026", status: "Overdue" },
+  { patient: "Vikram Singh", meta: "60 yrs · Male · UHID: SD-00990", condition: "Type 2 Diabetes", date: "18 Oct 2026", status: "Upcoming" },
+  { patient: "Meera Iyer", meta: "49 yrs · Female · UHID: SD-00671", condition: "Type 2 Diabetes", date: "25 Oct 2026", status: "Upcoming" },
+  { patient: "Suresh Kumar", meta: "62 yrs · Male · UHID: SD-00234", condition: "Type 2 Diabetes", date: "21 Oct 2026", status: "Upcoming" },
+];
+const inbox = [
+  { name: "Asha Sharma", preview: "I have uploaded this week’s glucose readings.", time: "10:42", unread: 2 },
+  { name: "Raj Mehta", preview: "Should I continue the same dose?", time: "09:18", unread: 1 },
+  { name: "Meera Kapoor", preview: "Thank you, doctor.", time: "Yesterday", unread: 0 },
+  { name: "Neha Gupta", preview: "My lab appointment is confirmed for Monday.", time: "Yesterday", unread: 0 },
+];
 const tabIcons = { Overview: Home, "Recent Activity": Activity, Investigations: FlaskConical, "Care Plan": ClipboardCheck, "Previous Visits": Clock3, Notes: MessageSquare };
 
-export function AvennDashboard() {
+export function AvennDashboard({ initialPage = "patients" }: { initialPage?: WorkspacePage }) {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("Overview");
   const [detail, setDetail] = useState<Detail>(null);
   const [followOpen, setFollowOpen] = useState(false);
@@ -85,30 +103,28 @@ export function AvennDashboard() {
   ]);
   const [tasks, setTasks] = useState(initialTasks);
   const [medications, setMedications] = useState([{ name: "Metformin", dosage: "500 mg", frequency: "BD", status: "Active" }]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
   const matches = useMemo(() => {
     const term = search.trim().toLowerCase();
     return term ? patients.filter((p) => [p.name, p.id, p.phone].some((v) => v.toLowerCase().includes(term))) : [];
   }, [search]);
 
-  const selectPatient = (patient: (typeof patients)[number]) => { setCurrentPatient(patient); setSearch(""); };
+  const selectPatient = (patient: (typeof patients)[number]) => { setCurrentPatient(patient); setSearch(""); if (initialPage !== "patients") navigate({ to: "/patients" }); };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} />
+      <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} active={initialPage} />
       <main className="min-h-screen lg:pl-48">
-        <TopHeader search={search} setSearch={setSearch} matches={matches} onSelect={selectPatient} onMenu={() => setMobileNav(true)} />
+        <TopHeader search={search} setSearch={setSearch} matches={matches} onSelect={selectPatient} onMenu={() => setMobileNav(true)} onNotifications={() => setNotificationsOpen(true)} onProfile={() => setProfileOpen(true)} />
         <div className="mx-auto max-w-[1500px] px-3 pb-24 sm:px-5 lg:px-7 lg:pb-8">
-          <PatientHeader patient={currentPatient} followDate={savedFollowDate} onFollow={() => setFollowOpen(true)} onConsult={() => { setConsultStep(1); setConsultOpen(true); }} />
-          <PatientTabs value={tab} onChange={setTab} />
-          <div className="pt-4">
-            {tab === "Overview" && <Overview onDetail={setDetail} tasks={tasks} setTasks={setTasks} onTab={setTab} />}
-            {tab === "Recent Activity" && <ActivityPage onDetail={setDetail} />}
-            {tab === "Investigations" && <InvestigationsPage filter={investigationFilter} setFilter={setInvestigationFilter} onDetail={setDetail} onAdd={() => setSimpleModal("investigation")} />}
-            {tab === "Care Plan" && <CarePlan medications={medications} onAdd={setSimpleModal} onFollow={() => setFollowOpen(true)} />}
-            {tab === "Previous Visits" && <VisitsPage onDetail={setDetail} />}
-            {tab === "Notes" && <NotesPage notes={notes} onAdd={() => setSimpleModal("note")} />}
-          </div>
+          {initialPage === "patients" ? <><PatientHeader patient={currentPatient} followDate={savedFollowDate} onFollow={() => setFollowOpen(true)} onConsult={() => { setConsultStep(1); setConsultOpen(true); }} onFeedback={setFeedback} /><PatientTabs value={tab} onChange={setTab} /><div className="pt-4">{tab === "Overview" && <Overview onDetail={setDetail} tasks={tasks} setTasks={setTasks} onTab={setTab} />}{tab === "Recent Activity" && <ActivityPage onDetail={setDetail} />}{tab === "Investigations" && <InvestigationsPage filter={investigationFilter} setFilter={setInvestigationFilter} onDetail={setDetail} onAdd={() => setSimpleModal("investigation")} />}{tab === "Care Plan" && <CarePlan medications={medications} tasks={tasks} setTasks={setTasks} onAdd={setSimpleModal} onFollow={() => setFollowOpen(true)} />}{tab === "Previous Visits" && <VisitsPage onDetail={setDetail} />}{tab === "Notes" && <NotesPage notes={notes} onAdd={() => setSimpleModal("note")} />}</div></> : null}
+          {initialPage === "dashboard" && <PracticeDashboard onNavigate={(to) => navigate({ to })} onDetail={setDetail} />}
+          {initialPage === "follow-ups" && <FollowUpsPage onAssign={() => setFollowOpen(true)} onOpenPatient={() => navigate({ to: "/patients" })} />}
+          {initialPage === "investigations" && <PracticeInvestigations onAssign={() => setSimpleModal("investigation")} onOpenPatient={() => navigate({ to: "/patients" })} />}
+          {initialPage === "messages" && <MessagesPage />}
         </div>
       </main>
 
@@ -119,50 +135,54 @@ export function AvennDashboard() {
         if (simpleModal === "note") setNotes((n) => [{ date: "25 Sep 2026", author: "Dr. Priya Sharma", text: value || "New patient note" }, ...n]);
         if (simpleModal === "medication") setMedications((m) => [...m, { name: value || "New medication", dosage: "500 mg", frequency: "OD", status: "Active" }]);
         if (simpleModal === "task") setTasks((t) => [...t, { title: value || "New patient task", note: "Assigned today", done: false }]);
+        if (simpleModal === "investigation") setFeedback(`${value || "Investigation"} assigned successfully`);
         setSimpleModal(null);
       }} />
-      <div className="fixed inset-x-3 bottom-3 z-40 flex gap-2 rounded-2xl border border-border/70 bg-card/90 p-2 shadow-xl backdrop-blur-xl lg:hidden">
+      <NotificationsSheet open={notificationsOpen} onOpenChange={setNotificationsOpen} />
+      <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />
+      {feedback && <div role="status" className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-soft"><Check className="size-4 text-primary"/>{feedback}<Button size="icon" variant="ghost" className="size-7" onClick={() => setFeedback("")} aria-label="Dismiss message"><X/></Button></div>}
+      {initialPage === "patients" && <div className="fixed inset-x-3 bottom-3 z-40 flex gap-2 rounded-2xl border border-border/70 bg-card/90 p-2 shadow-xl backdrop-blur-xl lg:hidden">
         <Button variant="outline" className="h-11 flex-1" onClick={() => setFollowOpen(true)}><CalendarDays /> Follow-up</Button>
         <Button className="h-11 flex-1 bg-navy hover:bg-navy/90" onClick={() => setConsultOpen(true)}>Start consultation <ArrowRight /></Button>
-      </div>
+      </div>}
     </div>
   );
 }
 
-function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
+function Sidebar({ open, onClose, active }: { open: boolean; onClose: () => void; active: WorkspacePage }) {
   const nav = [
-    ["Dashboard", Home], ["Patients", Users], ["Follow-ups", Clock3], ["Investigations", FlaskConical], ["Messages", MessageSquare],
+    ["Dashboard", Home, "/"], ["Patients", Users, "/patients"], ["Follow-ups", Clock3, "/follow-ups"], ["Investigations", FlaskConical, "/investigations"], ["Messages", MessageSquare, "/messages"],
   ] as const;
   return <>
     {open && <div className="fixed inset-0 z-40 bg-overlay lg:hidden" onClick={onClose} aria-hidden />}
     <aside className={cn("fixed inset-y-0 left-0 z-50 flex w-48 flex-col border-r border-border/50 bg-sidebar/95 px-4 py-6 backdrop-blur-xl transition-transform lg:translate-x-0", open ? "translate-x-0" : "-translate-x-full")}>
       <div className="mb-8 flex items-center justify-between px-2"><span className="text-2xl font-bold tracking-normal text-navy">Avenn</span><Button size="icon" variant="ghost" className="lg:hidden" onClick={onClose} aria-label="Close navigation"><X /></Button></div>
-      <nav className="space-y-2" aria-label="Main navigation">{nav.map(([label, Icon]) => <Button key={label} variant="ghost" className={cn("w-full justify-start gap-3 px-3 text-muted-foreground", label === "Patients" && "bg-accent text-primary shadow-sm hover:bg-accent")}><Icon />{label}</Button>)}</nav>
-      <div className="mt-auto space-y-2 border-t border-border/60 pt-4"><Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground"><Settings />Settings</Button><Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground"><UserRound />Profile</Button><p className="px-3 pt-5 text-xs leading-relaxed text-muted-foreground">Keeping care connected between visits.</p></div>
+      <nav className="space-y-2" aria-label="Main navigation">{nav.map(([label, Icon, to]) => <Button key={label} asChild variant="ghost" className={cn("w-full justify-start gap-3 px-3 text-muted-foreground", active === label.toLowerCase() && "bg-accent text-primary shadow-sm hover:bg-accent")}><Link to={to} onClick={onClose}><Icon />{label}</Link></Button>)}</nav>
+      <div className="mt-auto border-t border-border/60 pt-5"><div className="flex items-center gap-3 px-2"><img src={priyaImage} alt="Dr. Priya Sharma" className="size-9 rounded-full object-cover"/><div><p className="text-xs font-semibold">Dr. Priya Sharma</p><p className="text-xs text-muted-foreground">Endocrinologist</p></div></div><p className="px-2 pt-5 text-xs leading-relaxed text-muted-foreground">Keeping care connected between visits.</p></div>
     </aside>
   </>;
 }
 
-function TopHeader({ search, setSearch, matches, onSelect, onMenu }: { search: string; setSearch: (v: string) => void; matches: typeof patients; onSelect: (p: (typeof patients)[number]) => void; onMenu: () => void }) {
+function TopHeader({ search, setSearch, matches, onSelect, onMenu, onNotifications, onProfile }: { search: string; setSearch: (v: string) => void; matches: typeof patients; onSelect: (p: (typeof patients)[number]) => void; onMenu: () => void; onNotifications: () => void; onProfile: () => void }) {
   return <header className="sticky top-0 z-30 border-b border-border/40 bg-background/85 px-3 py-3 backdrop-blur-xl sm:px-5 lg:px-7">
     <div className="mx-auto flex max-w-[1500px] items-center gap-3">
       <Button size="icon" variant="ghost" className="lg:hidden" onClick={onMenu} aria-label="Open navigation"><Menu /></Button>
       <div className="relative max-w-xl flex-1"><Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 rounded-full border-transparent bg-card pl-11 shadow-soft" placeholder="Search patients by name, phone or UHID..." aria-label="Search patients" />
         {matches.length > 0 && <div className="absolute top-12 z-50 w-full overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-xl">{matches.map((p) => <Button key={p.id} variant="ghost" className="h-auto w-full justify-start px-3 py-3" onClick={() => onSelect(p)}><span className="grid size-8 place-items-center rounded-full bg-accent text-primary"><UserRound className="size-4"/></span><span className="text-left"><span className="block font-medium">{p.name}</span><span className="block text-xs text-muted-foreground">{p.id} · {p.phone}</span></span></Button>)}</div>}
       </div>
-      <Button variant="outline" className="hidden h-11 rounded-full bg-card md:flex"><CalendarDays/> Fri, 25 Sep 2026 <ChevronDown className="size-3"/></Button>
-      <Button size="icon" variant="outline" className="relative h-11 w-11 rounded-full bg-card" aria-label="Notifications"><Bell/><span className="absolute right-2 top-2 size-2 rounded-full bg-destructive"/></Button>
-      <div className="hidden items-center gap-2 sm:flex"><img src={priyaImage} alt="Dr. Priya Sharma" loading="lazy" width={816} height={816} className="size-10 rounded-full object-cover"/><div className="hidden xl:block"><p className="text-sm font-semibold">Dr. Priya Sharma</p><p className="text-xs text-muted-foreground">Endocrinologist</p></div><ChevronDown className="size-4 text-muted-foreground"/></div>
+      <div className="hidden h-11 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm md:flex"><CalendarDays className="size-4"/> Fri, 25 Sep 2026</div>
+      <Button size="icon" variant="outline" onClick={onNotifications} className="relative h-11 w-11 rounded-full bg-card" aria-label="Notifications"><Bell/><span className="absolute right-2 top-2 size-2 rounded-full bg-destructive"/></Button>
+      <Button variant="ghost" onClick={onProfile} className="hidden h-auto items-center gap-2 p-1 sm:flex"><img src={priyaImage} alt="Dr. Priya Sharma" loading="lazy" width={816} height={816} className="size-10 rounded-full object-cover"/><div className="hidden text-left xl:block"><p className="text-sm font-semibold">Dr. Priya Sharma</p><p className="text-xs font-normal text-muted-foreground">Endocrinologist</p></div><ChevronDown className="size-4 text-muted-foreground"/></Button>
     </div>
   </header>;
 }
 
-function PatientHeader({ patient, followDate, onFollow, onConsult }: { patient: (typeof patients)[number]; followDate: string; onFollow: () => void; onConsult: () => void }) {
+function PatientHeader({ patient, followDate, onFollow, onConsult, onFeedback }: { patient: (typeof patients)[number]; followDate: string; onFollow: () => void; onConsult: () => void; onFeedback: (value:string) => void }) {
   return <section className="glass-panel mt-4 flex flex-col gap-5 overflow-hidden rounded-2xl p-5 sm:p-6 xl:flex-row xl:items-center">
     <div className="flex min-w-0 flex-1 items-center gap-4"><div className="relative shrink-0">{patient.image ? <img src={patient.image} alt={patient.name} width={816} height={816} className="size-20 rounded-full object-cover ring-4 ring-card sm:size-24"/> : <div className="grid size-20 place-items-center rounded-full bg-accent text-primary ring-4 ring-card sm:size-24"><UserRound className="size-9"/></div>}<span className="absolute bottom-0 right-0 grid size-7 place-items-center rounded-full border-2 border-card bg-card text-primary"><Camera className="size-3.5"/></span></div>
-      <div className="min-w-0"><h1 className="truncate text-2xl font-bold text-navy sm:text-3xl">{patient.name}</h1><p className="mt-1 text-sm text-muted-foreground sm:text-base">{patient.age} yrs <span className="mx-2">·</span> {patient.gender} <span className="mx-2">·</span> {patient.condition}</p><div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground"><span>UHID: {patient.id}</span><Copy className="size-3.5"/></div><div className="mt-3 flex flex-wrap gap-2"><span className="tag">T2D</span><span className="tag">On Metformin</span><span className="tag">Since 2018</span></div></div>
+      <div className="min-w-0"><h1 className="truncate text-2xl font-bold text-navy sm:text-3xl">{patient.name}</h1><p className="mt-1 text-sm text-muted-foreground sm:text-base">{patient.age} yrs <span className="mx-2">·</span> {patient.gender} <span className="mx-2">·</span> {patient.condition}</p><div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground"><span>UHID: {patient.id}</span><Button size="icon" variant="ghost" className="size-6" aria-label="Copy UHID" onClick={() => { navigator.clipboard?.writeText(patient.id); onFeedback("UHID copied"); }}><Copy className="size-3.5"/></Button></div><div className="mt-3 flex flex-wrap gap-2"><span className="tag">T2D</span><span className="tag">On Metformin</span><span className="tag">Since 2018</span></div></div>
     </div>
-    <div className="hidden flex-wrap gap-3 lg:flex"><Button variant="outline" className="h-12 rounded-xl bg-card/70 px-5" onClick={onFollow}><CalendarDays className="text-primary"/>{followDate ? formatDate(followDate) : "Upcoming Follow-up"}</Button><Button className="h-12 rounded-xl bg-navy px-6 hover:bg-navy/90" onClick={onConsult}>Start Consultation <ArrowRight/></Button><Button size="icon" variant="ghost" className="h-12 w-12 rounded-xl" aria-label="More patient actions"><MoreHorizontal/></Button></div>
+    <div className="hidden flex-wrap gap-3 lg:flex"><Button variant="outline" className="h-12 rounded-xl bg-card/70 px-5" onClick={onFollow}><CalendarDays className="text-primary"/>{followDate ? formatDate(followDate) : "Upcoming Follow-up"}</Button><Button className="h-12 rounded-xl bg-navy px-6 hover:bg-navy/90" onClick={onConsult}>Start Consultation <ArrowRight/></Button></div>
   </section>;
 }
 
