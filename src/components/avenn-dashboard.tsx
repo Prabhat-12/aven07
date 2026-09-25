@@ -19,12 +19,13 @@ import priyaImage from "@/assets/priya-sharma.jpg";
 type Tab = "Overview" | "Recent Activity" | "Investigations" | "Care Plan" | "Previous Visits" | "Notes";
 type Detail = { kind: "investigation" | "task" | "activity" | "visit"; title: string; subtitle?: string } | null;
 type SimpleModal = "medication" | "investigation" | "task" | "note" | null;
+type Patient = { name: string; id: string; phone: string; age: number; gender: string; condition: string; image?: string };
 
-const primaryPatient = { name: "Asha Sharma", id: "SD-00421", phone: "+91 98765 40121", age: 52, gender: "Female", condition: "Type 2 Diabetes", image: ashaImage };
-const patients = [
+const primaryPatient: Patient = { name: "Asha Sharma", id: "SD-00421", phone: "+91 98765 40121", age: 52, gender: "Female", condition: "Type 2 Diabetes", image: ashaImage };
+const patients: Patient[] = [
   primaryPatient,
-  { name: "Rohan Mehta", id: "SD-00387", phone: "+91 98100 93875", age: 46, gender: "Male", condition: "Type 2 Diabetes", image: undefined },
-  { name: "Meera Kapoor", id: "SD-00435", phone: "+91 99887 20435", age: 61, gender: "Female", condition: "Type 1 Diabetes", image: undefined },
+  { name: "Rohan Mehta", id: "SD-00387", phone: "+91 98100 93875", age: 46, gender: "Male", condition: "Type 2 Diabetes" },
+  { name: "Meera Kapoor", id: "SD-00435", phone: "+91 99887 20435", age: 61, gender: "Female", condition: "Type 1 Diabetes" },
 ];
 
 const metrics = [
