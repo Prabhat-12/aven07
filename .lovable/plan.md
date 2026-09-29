@@ -47,8 +47,6 @@ No changes are made yet. This is a review of what was discussed and a proposal f
 - Keep in-app only. Add a clear "Emergency (off-hours)" button that bypasses time limits and connects to the doctor directly.
 - Show office-hours state on threads. Patient-facing preview shows warning signs plus "Please consult your doctor immediately."
 
-### E. Notifications
-- Remove the bell. Show a red dot/count on the Patients and Follow-ups sidebar items (for example, Follow-ups with lost-to-follow-up count).
 
 ### F. Role views (new)
 - Add a simple role switcher (Doctor, Receptionist, Patient) as a prototype control.
