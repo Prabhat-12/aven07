@@ -35,7 +35,7 @@ const taskNote = (t: Task, p: Patient) => (t.kind === "follow-up" ? `Next follow
 
 const PatientsCtx = createContext<Patient[]>([]);
 const usePatients = () => useContext(PatientsCtx);
-type Doctor = { name: string; email: string; specialty: string; photo?: string };
+type Doctor = { name: string; email: string; specialty: string; photo?: string | undefined };
 const DoctorCtx = createContext<Doctor>({ name: "Doctor", email: "", specialty: "Endocrinologist" });
 const useDoctor = () => useContext(DoctorCtx);
 

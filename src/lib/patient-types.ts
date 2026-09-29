@@ -9,7 +9,7 @@ export type Comparison = {
 };
 export type Point = { month: string; value: number };
 export type Patient = {
-  dbId: string; name: string; id: string; phone: string; age: number; gender: string; condition: string; image?: string;
+  dbId: string; name: string; id: string; phone: string; age: number; gender: string; condition: string; image?: string | undefined;
   tags: string[]; slot: string; followUp: string; followUpIso: string; followUpStatus: string; summary: string;
   metrics: Metric[]; trend: Point[]; creatTrend: Point[]; cholesterol: { value: number; date: string; trend: Point[] };
   comparisons: Comparison[]; tasks: Task[]; medications: Medication[];
