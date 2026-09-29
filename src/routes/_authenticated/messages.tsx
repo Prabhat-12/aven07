@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AvennDashboard } from "@/components/avenn-dashboard";
+import { AppEntry } from "@/components/app-entry";
 
-export const Route = createFileRoute("/messages")({
+export const Route = createFileRoute("/_authenticated/messages")({
   head: () => ({ meta: [
     { title: "Messages | Avenn" },
     { name: "description", content: "Secure patient and care-team conversations in Avenn." },
@@ -10,5 +10,5 @@ export const Route = createFileRoute("/messages")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
-  component: () => <AvennDashboard initialPage="messages" />,
+  component: () => <AppEntry page="messages" />,
 });

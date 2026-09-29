@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790678648364,
+      "tag": "0000_avenn_rbac_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790678717364,
+      "tag": "0001_avenn_seed_patients",
+      "breakpoints": true
+    }
+  ]
+}

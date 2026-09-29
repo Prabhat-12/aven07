@@ -8,3 +8,20 @@
 - [x] Connect primary navigation, notifications, profile, and patient actions
 - [x] Verify desktop journeys and build health
 - [x] Verify compact-screen navigation and page layout
+
+# Endocrinologist feedback (approved plan)
+- [ ] A. Status terminology (Lost to Follow-up / Upcoming)
+- [ ] B. Metrics: remove targets, HbA1c 6m/1y, PPG, eGFR, creatinine graph, cholesterol graph window, Ophthalmology Consult
+- [ ] C. Rx popover, 3 broad tasks, next follow-up in tasks, private note label
+- [ ] D. Messaging office-hours + emergency
+- [ ] F. Cloud auth, onboarding, roles (doctor/receptionist/patient), RLS-protected data, receptionist minimal view, patient view
+- [ ] Verify each role; receptionist blocked from clinical data
+(E notifications: removed from scope by user)
+
+## Build status (endocrinologist feedback)
+- [x] A. Lost to Follow-up / Upcoming everywhere (red status box)
+- [x] B. 6m/1y trend only, no target ranges, eGFR tile, PPG, creatinine graph, cholesterol value + graph window, Ophthalmology Consult
+- [x] C. Rx hover popup, three broad tasks, "Next follow-up on" inside tasks, private notes shared with patient
+- [x] D. In-app messaging note with office hours; patient Emergency (off-hours) button + warning signs
+- [x] F. Sign-up, onboarding, role-based views (doctor / receptionist / patient), data in Lovable Cloud with row-level rules
+- [ ] Verify each role with real sign-ins (blocked: email confirmation needs a real inbox)
