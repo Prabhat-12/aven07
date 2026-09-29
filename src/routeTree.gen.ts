@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedFollowUpsRouteImport } from './routes/_authenticated/follow-ups'
 import { Route as AuthenticatedInvestigationsRouteImport } from './routes/_authenticated/investigations'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticated/patients'
 
 const IndexRoute = IndexRouteImport.update({
@@ -24,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -47,6 +54,11 @@ const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
   path: '/messages',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPatientsRoute = AuthenticatedPatientsRouteImport.update({
   id: '/patients',
   path: '/patients',
@@ -55,61 +67,74 @@ const AuthenticatedPatientsRoute = AuthenticatedPatientsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/follow-ups': typeof AuthenticatedFollowUpsRoute
   '/investigations': typeof AuthenticatedInvestigationsRoute
   '/messages': typeof AuthenticatedMessagesRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/patients': typeof AuthenticatedPatientsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/follow-ups': typeof AuthenticatedFollowUpsRoute
   '/investigations': typeof AuthenticatedInvestigationsRoute
   '/messages': typeof AuthenticatedMessagesRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/patients': typeof AuthenticatedPatientsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/follow-ups': typeof AuthenticatedFollowUpsRoute
   '/_authenticated/investigations': typeof AuthenticatedInvestigationsRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/patients': typeof AuthenticatedPatientsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/dashboard'
     | '/follow-ups'
     | '/investigations'
     | '/messages'
+    | '/onboarding'
     | '/patients'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/dashboard'
     | '/follow-ups'
     | '/investigations'
     | '/messages'
+    | '/onboarding'
     | '/patients'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/follow-ups'
     | '/_authenticated/investigations'
     | '/_authenticated/messages'
+    | '/_authenticated/onboarding'
     | '/_authenticated/patients'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -126,6 +151,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard': {
@@ -156,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMessagesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/patients': {
       id: '/_authenticated/patients'
       path: '/patients'
@@ -171,6 +210,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFollowUpsRoute: typeof AuthenticatedFollowUpsRoute
   AuthenticatedInvestigationsRoute: typeof AuthenticatedInvestigationsRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPatientsRoute: typeof AuthenticatedPatientsRoute
 }
 
@@ -179,6 +219,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFollowUpsRoute: AuthenticatedFollowUpsRoute,
   AuthenticatedInvestigationsRoute: AuthenticatedInvestigationsRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPatientsRoute: AuthenticatedPatientsRoute,
 }
 
@@ -188,6 +229,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
