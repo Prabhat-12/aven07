@@ -70,8 +70,14 @@ export const completeOnboarding = createServerFn({ method: "POST" })
     }
 
     // patient: must match an existing record by UHID and phone number
-    const clinical = await supabaseAdmin.from("patient_clinical").select("patient_id, phone").ilike("uhid", data.uhid);
-    const match = clinical.data?.find((row) => digits(row.phone) === digits(data.phone));
+    // Tolerate formatting differences: "sd 00421" == "SD-00421", "98765 40121" == "+91 98765 40121".
+    const normUhid = (v: string) => v.replace(/[^a-z0-9]/gi, "").toUpperCase();
+    const last10 = (v: string) => digits(v).slice(-10);
+    const clinical = await supabaseAdmin.from("patient_clinical").select("patient_id, uhid, phone");
+    if (clinical.error) throw new Error("Could not check your record. Please try again.");
+    const match = clinical.data.find(
+      (row) => normUhid(row.uhid) === normUhid(data.uhid) && last10(row.phone) === last10(data.phone) && last10(data.phone).length >= 10,
+    );
     if (!match) throw new Error("We could not match these details to a patient record. Check your UHID and phone number.");
     const patient = await supabaseAdmin.from("patients").select("id, user_id").eq("id", match.patient_id).single();
     if (patient.error || patient.data.user_id) throw new Error("This patient record is already linked to an account.");
