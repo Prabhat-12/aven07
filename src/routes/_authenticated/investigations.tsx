@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AvennDashboard } from "@/components/avenn-dashboard";
+import { AppEntry } from "@/components/app-entry";
 
-export const Route = createFileRoute("/investigations")({
+export const Route = createFileRoute("/_authenticated/investigations")({
   head: () => ({ meta: [
     { title: "Investigations | Avenn" },
     { name: "description", content: "Track assigned investigations, incoming results, and clinical reviews." },
@@ -10,5 +10,5 @@ export const Route = createFileRoute("/investigations")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
-  component: () => <AvennDashboard initialPage="investigations" />,
+  component: () => <AppEntry page="investigations" />,
 });
