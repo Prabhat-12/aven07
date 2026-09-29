@@ -14,16 +14,231 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_role: string | null
+          created_at: string
+          details: Json
+          id: string
+          patient_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          patient_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          patient_id?: string | null
+        }
+        Relationships: []
+      }
+      patient_clinical: {
+        Row: {
+          age: number
+          condition: string
+          data: Json
+          gender: string
+          patient_id: string
+          phone: string
+          summary: string
+          tags: string[]
+          uhid: string
+        }
+        Insert: {
+          age: number
+          condition: string
+          data?: Json
+          gender: string
+          patient_id: string
+          phone: string
+          summary?: string
+          tags?: string[]
+          uhid: string
+        }
+        Update: {
+          age?: number
+          condition?: string
+          data?: Json
+          gender?: string
+          patient_id?: string
+          phone?: string
+          summary?: string
+          tags?: string[]
+          uhid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_clinical_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: true
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_notes: {
+        Row: {
+          author_name: string
+          created_at: string
+          id: string
+          note_date: string
+          patient_id: string
+          shared: boolean
+          text: string
+        }
+        Insert: {
+          author_name: string
+          created_at?: string
+          id?: string
+          note_date?: string
+          patient_id: string
+          shared?: boolean
+          text: string
+        }
+        Update: {
+          author_name?: string
+          created_at?: string
+          id?: string
+          note_date?: string
+          patient_id?: string
+          shared?: boolean
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_notes_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          created_at: string
+          doctor_id: string | null
+          follow_up_date: string | null
+          follow_up_status: string
+          id: string
+          image_key: string | null
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          doctor_id?: string | null
+          follow_up_date?: string | null
+          follow_up_status?: string
+          id?: string
+          image_key?: string | null
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string | null
+          follow_up_date?: string | null
+          follow_up_status?: string
+          id?: string
+          image_key?: string | null
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          approved: boolean
+          clinic: string | null
+          created_at: string
+          dob: string | null
+          doctor_id: string | null
+          email: string
+          full_name: string
+          height_cm: number | null
+          id: string
+          specialty: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          approved?: boolean
+          clinic?: string | null
+          created_at?: string
+          dob?: string | null
+          doctor_id?: string | null
+          email: string
+          full_name: string
+          height_cm?: number | null
+          id: string
+          specialty?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          approved?: boolean
+          clinic?: string | null
+          created_at?: string
+          dob?: string | null
+          doctor_id?: string | null
+          email?: string
+          full_name?: string
+          height_cm?: number | null
+          id?: string
+          specialty?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_doctor_of: { Args: { _patient_id: string }; Returns: boolean }
+      receptionist_doctor: { Args: { _user_id: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "doctor" | "receptionist" | "patient"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +365,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["doctor", "receptionist", "patient"],
+    },
   },
 } as const

@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790678648364,
+      "tag": "0000_avenn_rbac_schema",
+      "breakpoints": true
+    }
+  ]
 }
