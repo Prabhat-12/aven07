@@ -48,10 +48,32 @@ No changes are made yet. This is a review of what was discussed and a proposal f
 - Show office-hours state on threads. Patient-facing preview shows warning signs plus "Please consult your doctor immediately."
 
 
-### F. Role views (new)
-- Add a simple role switcher (Doctor, Receptionist, Patient) as a prototype control.
-- Receptionist: only patient name and follow-up schedule (no diagnosis, treatment, tests, messages of clinical content).
-- Patient: Diet, Lifestyle, Exercise based on BMI, General awareness, Warning signs.
+### F. Role-based access with sign-up, onboarding and secure sign-in (new)
+Requires enabling Lovable Cloud (real accounts and a database). The prototype role switcher is dropped: a user's role is fixed by their account, not chosen from a menu.
+
+**Sign-up and onboarding**
+- Sign-up with email and password (plus Google), then a short onboarding that captures name, role (Doctor, Receptionist, Patient) and role-specific details (doctor: specialty and clinic; receptionist: clinic they work for; patient: date of birth, height and weight for BMI).
+- Receptionist accounts must be linked to a clinic and approved by a doctor before they see anything. Doctor role cannot be self-claimed by a receptionist or patient afterwards.
+- Sign-in sends each user straight to their own view. Signed-out users only see the sign-in page.
+
+**Roles are stored securely**
+- Roles live in a separate roles table, never on the user profile, and are checked on the server. Role changes are made only by an admin/doctor action, never from the browser.
+- Changing a role never deletes or overwrites patient records, notes, tasks or messages; data belongs to the patient record, not to the role.
+
+**Receptionist: strict data protection**
+- Sees only patient name and follow-up schedule (date, status such as Upcoming or Lost to Follow-up), and can book or reschedule follow-ups.
+- Medications, diagnosis, treatment, test results, doctor notes, care plans and clinical messages are blocked at the database level (row and column restrictions), so they are never sent to a receptionist's browser at all, not just hidden on screen.
+- Receptionists get a separate minimal data source (name and schedule only). Rx popover, metrics, investigations and notes do not exist in their view or in their network responses.
+- Access attempts and follow-up edits are recorded in an audit log.
+
+**Doctor**
+- Sees full records only for their own patients (doctor-patient relationship enforced per patient).
+
+**Patient**
+- Sees only their own record: Diet, Lifestyle, Exercise based on BMI, General awareness, Warning signs, their follow-up date, and visible doctor notes.
+
+**Verification**
+- Test each role with real sign-ins and confirm a receptionist request for medications, notes or results is refused by the server.
 
 ### G. Not doing
 - No AI assistant on the doctor dashboard; no automation of prescriptions or tests.
