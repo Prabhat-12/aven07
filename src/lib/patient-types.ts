@@ -16,7 +16,9 @@ export type Patient = {
   activities: { date: string; title: string; note: string }[];
   visits: { date: string; title: string; summary: string; actions: string[] }[];
   notes: Note[]; rawData: Record<string, unknown>;
+  careTasks?: CareTask[]; checkins?: CheckIn[]; appointmentStatus?: string;
 };
+import type { CareTask, CheckIn } from "./care-loop";
 
 export const TODAY_ISO = "2026-09-25";
 export const STATUS_LOST = "Lost to Follow-up";

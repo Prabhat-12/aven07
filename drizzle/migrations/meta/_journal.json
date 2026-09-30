@@ -15,6 +15,13 @@
       "when": 1790678717364,
       "tag": "0001_avenn_seed_patients",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790752518027,
+      "tag": "0002_care_loop_tasks_checkins_appointments",
+      "breakpoints": true
     }
   ]
 }

@@ -19,7 +19,8 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount, useSignOut } from "@/lib/account";
-import { addPatientNote, loadDoctorPatients, saveClinicalPatch, saveFollowUp } from "@/lib/doctor-data";
+import { addCareTask, addPatientNote, loadDoctorPatients, saveClinicalPatch, saveFollowUp } from "@/lib/doctor-data";
+import { latestDifficulty, progressOf, taskState } from "@/lib/care-loop";
 import { STATUS_LOST, followUpStatusFor, type Comparison, type Medication, type Metric, type Note, type Patient, type Point, type Task } from "@/lib/patient-types";
 import { StatusBadge } from "@/components/status-badge";
 import priyaImage from "@/assets/priya-sharma.jpg";
@@ -145,6 +146,7 @@ function DashboardShell({ initialPage, guest }: { initialPage: WorkspacePage; gu
       } catch { setFeedback("Could not save the note."); }
     }
     if (simpleModal === "medication") persistMedications([...medications, { name: value || "New medication", dosage: "500 mg", frequency: "OD", status: "Active" }]);
+    if (simpleModal === "task" && value) { if (guest) guest.onPatientsChange(patients.map((p) => p.id === currentPatient.id ? { ...p, careTasks: [...(p.careTasks ?? []), { id: `${p.id}-${Date.now()}`, title: value, detail: "Assigned today", dueIso: null, status: "Not started" }] } : p)); else void addCareTask(currentPatient.dbId, value, "Assigned today").then(() => queryClient.invalidateQueries({ queryKey: ["doctor-patients"] })).catch(() => setFeedback("We couldn\u2019t share that task with the patient. Nothing was changed.")); }
     if (simpleModal === "task" && value) persistTasks((t) => [...t, { title: value, note: "Assigned today", done: false, ...(value === "Regular Follow-up" ? { kind: "follow-up" as const } : {}) }]);
     if (simpleModal === "investigation") setFeedback(`${value || "Investigation"} assigned successfully`);
     setSimpleModal(null);
@@ -248,7 +250,7 @@ function TopHeader({ search, setSearch, matches, onSelect, onMenu, onNotificatio
 }
 
 function PatientHeader({ patient, medications, onFollow, onConsult }: { patient: Patient; medications: Medication[]; onFollow: () => void; onConsult: () => void }) {
-  return <section className="glass-panel mt-4 flex flex-col gap-5 overflow-hidden rounded-2xl p-5 sm:p-6 xl:flex-row xl:items-center">
+  return <section className="panel mt-4 flex flex-col gap-5 overflow-hidden p-5 sm:p-6 xl:flex-row xl:items-center">
     <div className="flex min-w-0 flex-1 items-center gap-4"><div className="relative shrink-0">{patient.image ? <img src={patient.image} alt={patient.name} width={816} height={816} className="size-20 rounded-full object-cover ring-4 ring-card sm:size-24"/> : <div className="grid size-20 place-items-center rounded-full bg-accent text-2xl font-semibold text-primary ring-4 ring-card sm:size-24">{initials(patient.name)}</div>}<span className="absolute bottom-0 right-0 grid size-7 place-items-center rounded-full border-2 border-card bg-card text-primary"><Camera className="size-3.5"/></span></div>
       <div className="min-w-0"><h1 className="truncate text-2xl font-bold text-navy sm:text-3xl">{patient.name}</h1><p className="mt-1 text-sm text-muted-foreground sm:text-base">{patient.age} yrs <span className="mx-2">·</span> {patient.gender} <span className="mx-2">·</span> {patient.condition}</p><div className="mt-3 flex flex-wrap gap-2">{patient.tags.map((tag) => <span key={tag} className="tag">{tag}</span>)}<RxChip meds={medications}/><StatusBadge status={patient.followUpStatus}/></div></div>
     </div>
@@ -262,16 +264,49 @@ function PatientTabs({ value, onChange }: { value: Tab; onChange: (tab: Tab) => 
 
 function Overview({ patient, onDetail, tasks, setTasks, onTab, onSelectPatient }: { patient: Patient; onDetail: (d: Detail) => void; tasks: Task[]; setTasks: React.Dispatch<React.SetStateAction<Task[]>>; onTab: (tab: Tab) => void; onSelectPatient: (p: Patient) => void }) {
   const patients = usePatients();
-  return <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
-    <div className="space-y-4">
-      <section className="panel p-4"><div className="mb-3 flex items-center justify-between"><h2 className="section-title">Key Information <Info className="size-4 text-muted-foreground"/></h2><span className="text-xs text-muted-foreground">Last updated: {patient.metrics[0]?.date}</span></div><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{patient.metrics.map((m) => <MetricCard key={m.label} {...m} onClick={() => onDetail({ kind: "investigation", title: m.label, subtitle: m.value })}/>)}</div></section>
-      <div className="grid gap-4 xl:grid-cols-[1.15fr_.85fr]"><TrendChart data={patient.trend}/><ListCard title="Latest Investigations" action={() => onTab("Investigations")}>{patient.comparisons.slice(0, 4).map((item) => <ComparisonRow key={item.name} item={item} onClick={() => onTab("Investigations")}/>)}</ListCard></div>
-      <div className="grid gap-4 md:grid-cols-2"><SmallTrend title="Serum Creatinine" unit="mg/dL" data={patient.creatTrend}/><CholesterolCard patient={patient}/></div>
-      <ListCard title="Open Tasks" action={() => onTab("Care Plan")}>{tasks.map((task, i) => <Button key={task.title} variant="ghost" className="h-auto w-full justify-start rounded-lg px-1 py-2.5 text-left" onClick={() => { setTasks((current) => current.map((t, index) => index === i ? { ...t, done: !t.done } : t)); }}><span className={cn("grid size-5 shrink-0 place-items-center rounded-full border", task.done ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/60")} >{task.done && <Check className="size-3"/>}</span><span className="min-w-0 flex-1"><span className={cn("block font-medium", task.done && "text-muted-foreground line-through")}>{task.title}</span><span className="block text-xs font-normal text-muted-foreground">{taskNote(task, patient)}</span></span><ChevronRight className="size-4 text-muted-foreground"/></Button>)}</ListCard>
+  const [showDetail, setShowDetail] = useState(false);
+  const hba1c = patient.comparisons.find((c) => c.name === "HbA1c");
+  const hbChange = hba1c ? changeOf(hba1c) : null;
+  const weight = patient.metrics.find((m) => m.label === "Weight");
+  const pending = patient.comparisons.filter((c) => c.status === "Pending");
+  const careTasks = patient.careTasks ?? [];
+  const progress = progressOf(careTasks);
+  const difficulty = latestDifficulty(patient.checkins);
+  const lastCheckin = patient.checkins?.[0];
+  const overdue = careTasks.filter((t) => ["Overdue", "Due today"].includes(taskState(t).label));
+  const attention = [
+    ...pending.map((c) => ({ key: `inv-${c.name}`, icon: FlaskConical, title: `${c.name} — pending`, note: c.note, tab: "Investigations" as Tab })),
+    ...overdue.map((t) => ({ key: `task-${t.id}`, icon: AlertCircle, title: `${t.title} — ${taskState(t).label.toLowerCase()}`, note: t.detail, tab: "Care Plan" as Tab })),
+    ...(difficulty ? [{ key: "checkin", icon: MessageSquare, title: "Patient reported difficulty", note: difficulty.message || difficulty.status, tab: "Notes" as Tab }] : []),
+    ...(patient.followUpStatus !== "Upcoming" ? [{ key: "follow", icon: CalendarDays, title: `Follow-up: ${patient.followUpStatus}`, note: patient.followUp, tab: "Care Plan" as Tab }] : []),
+  ];
+  const loop = [["Planned", String(progress.total)], ["Completed", String(progress.done)], ["Pending", String(progress.total - progress.done)], ["Next", patient.followUp]];
+  const lastVisit = patient.visits[0];
+  const since = [
+    { label: "HbA1c", value: hba1c && hba1c.previous !== null && hba1c.latest !== null ? `${hba1c.previous} → ${hba1c.latest}%` : patient.metrics[0]?.value ?? "—", note: hbChange ? (hbChange.flat ? "No change" : hbChange.diff < 0 ? "Down" : "Up") : "" },
+    { label: "Weight", value: weight?.value ?? "—", note: weight?.date ?? "" },
+    { label: "Investigation", value: pending[0] ? pending[0].name : "None pending", note: pending[0] ? "Pending" : "" },
+    { label: "Patient update", value: lastCheckin ? lastCheckin.status : "No update yet", note: lastCheckin?.message ?? "" },
+  ];
+  return <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+    <div className="space-y-6">
+      <section aria-labelledby="since-heading"><h2 id="since-heading" className="section-title mb-3">Since last visit</h2><dl className="grid grid-cols-2 divide-border/70 rounded-lg border border-border/70 bg-card sm:grid-cols-4 sm:divide-x">{since.map((item) => <div key={item.label} className="border-b border-border/70 p-4 last:border-b-0 sm:border-b-0"><dt className="text-xs text-muted-foreground">{item.label}</dt><dd className="mt-1 font-semibold text-navy">{item.value}</dd><p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{item.note}</p></div>)}</dl></section>
+      <section aria-labelledby="attention-heading"><h2 id="attention-heading" className="section-title mb-2">Needs attention</h2>{attention.length === 0 ? <div className="rounded-lg bg-accent p-4"><p className="font-medium text-navy">You're all caught up</p><p className="text-sm text-muted-foreground">No follow-ups or results need your attention right now.</p></div> : <ul className="divide-y divide-border/60 rounded-lg border border-border/70 bg-card">{attention.map((a) => <li key={a.key}><Button variant="ghost" className="h-auto w-full justify-start gap-3 rounded-none px-4 py-3 text-left" onClick={() => onTab(a.tab)}><a.icon className="text-primary"/><span className="min-w-0 flex-1"><span className="block font-medium">{a.title}</span><span className="block truncate text-xs font-normal text-muted-foreground">{a.note}</span></span><ChevronRight className="text-muted-foreground"/></Button></li>)}</ul>}</section>
+      <section aria-labelledby="loop-heading"><h2 id="loop-heading" className="section-title mb-2">Care loop</h2><ol className="grid grid-cols-2 gap-2 sm:grid-cols-4">{loop.map(([label, value], index) => <li key={label} className="flex items-center gap-2 border-t-2 border-primary/30 pt-2"><span className="text-xs font-semibold text-primary">{index + 1}</span><span><span className="block text-xs text-muted-foreground">{label}</span><span className="block font-semibold text-navy">{value}</span></span></li>)}</ol></section>
+      <section className="flat-section"><div className="mb-2 flex items-center justify-between"><h2 className="section-title">Recent investigations</h2><Button variant="link" className="h-auto p-0" onClick={() => onTab("Investigations")}>View all <ArrowRight/></Button></div><div>{patient.comparisons.slice(0, 4).map((item) => <ComparisonRow key={item.name} item={item} onClick={() => onTab("Investigations")}/>)}</div></section>
+      {lastVisit && <section className="flat-section"><div className="mb-2 flex items-center justify-between"><h2 className="section-title">Previous visit</h2><Button variant="link" className="h-auto p-0" onClick={() => onTab("Previous Visits")}>View full visit <ArrowRight/></Button></div><p className="text-xs font-semibold text-primary">{lastVisit.date} · {lastVisit.title}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{lastVisit.summary}</p></section>}
+      <section className="flat-section"><Button variant="outline" size="sm" aria-expanded={showDetail} onClick={() => setShowDetail((v) => !v)}>{showDetail ? "Hide full detail" : "Show full detail"}</Button>
+        {showDetail && <div className="mt-4 space-y-4">
+          <section className="panel p-4"><div className="mb-3 flex items-center justify-between"><h2 className="section-title">Key Information <Info className="size-4 text-muted-foreground"/></h2><span className="text-xs text-muted-foreground">Last updated: {patient.metrics[0]?.date}</span></div><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{patient.metrics.map((m) => <MetricCard key={m.label} {...m} onClick={() => onDetail({ kind: "investigation", title: m.label, subtitle: m.value })}/>)}</div></section>
+          <TrendChart data={patient.trend}/>
+          <div className="grid gap-4 md:grid-cols-2"><SmallTrend title="Serum Creatinine" unit="mg/dL" data={patient.creatTrend}/><CholesterolCard patient={patient}/></div>
+          <ListCard title="Open Tasks" action={() => onTab("Care Plan")}>{tasks.map((task, i) => <Button key={task.title} variant="ghost" className="h-auto w-full justify-start rounded-lg px-1 py-2.5 text-left" onClick={() => { setTasks((current) => current.map((t, index) => index === i ? { ...t, done: !t.done } : t)); }}><span className={cn("grid size-5 shrink-0 place-items-center rounded-full border", task.done ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/60")} >{task.done && <Check className="size-3"/>}</span><span className="min-w-0 flex-1"><span className={cn("block font-medium", task.done && "text-muted-foreground line-through")}>{task.title}</span><span className="block text-xs font-normal text-muted-foreground">{taskNote(task, patient)}</span></span><ChevronRight className="size-4 text-muted-foreground"/></Button>)}</ListCard>
+        </div>}
+      </section>
     </div>
-    <aside className="space-y-4">
-      <section className="panel p-4"><h3 className="section-title mb-1">Next patients</h3><p className="mb-3 text-xs text-muted-foreground">Today’s list · Friday, 25 September</p><div className="space-y-1">{patients.map((p) => <Button key={p.id} variant="ghost" onClick={() => onSelectPatient(p)} className={cn("h-auto w-full justify-start gap-3 rounded-xl p-2.5 text-left", p.id === patient.id && "bg-accent")}><span className="w-11 shrink-0 text-xs font-semibold text-primary">{p.slot}</span>{p.image ? <img src={p.image} alt={p.name} className="size-9 shrink-0 rounded-full object-cover"/> : <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-xs font-semibold text-primary">{initials(p.name)}</span>}<span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{p.name}</span><span className="block truncate text-xs font-normal text-muted-foreground">{p.age} yrs · {p.condition}</span></span><ChevronRight className="size-4 shrink-0 text-muted-foreground"/></Button>)}</div></section>
-      <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft"><div className="summary-art relative flex min-h-48 items-end p-4"><div className="w-full rounded-xl border border-card/70 bg-card/55 p-4 backdrop-blur-xl"><p className="text-xl font-medium leading-tight text-navy">One patient.<br/>One shared<br/>care loop.</p></div></div><div className="p-5"><h3 className="flex items-center gap-2 font-semibold">Patient summary <Info className="size-4 text-muted-foreground"/></h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{patient.summary}</p></div></section>
+    <aside className="space-y-6">
+      <section><h3 className="section-title mb-1">Next patients</h3><p className="mb-2 text-xs text-muted-foreground">Today’s list · Friday, 25 September</p><div className="space-y-1">{patients.map((p) => <Button key={p.id} variant="ghost" onClick={() => onSelectPatient(p)} className={cn("h-auto w-full justify-start gap-3 rounded-lg p-2.5 text-left", p.id === patient.id && "bg-accent")}><span className="w-11 shrink-0 text-xs font-semibold text-primary">{p.slot}</span>{p.image ? <img src={p.image} alt={p.name} className="size-9 shrink-0 rounded-full object-cover"/> : <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-xs font-semibold text-primary">{initials(p.name)}</span>}<span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{p.name}</span><span className="block truncate text-xs font-normal text-muted-foreground">{p.age} yrs · {p.condition}</span></span><ChevronRight className="size-4 shrink-0 text-muted-foreground"/></Button>)}</div></section>
+      <section className="flat-section"><h3 className="section-title">Patient summary</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{patient.summary}</p></section>
     </aside>
   </div>;
 }
@@ -378,26 +413,29 @@ function PracticeDashboard({ onNavigate, onSelectPatient }: { onNavigate: (to: "
   const patients = usePatients();
   const doctor = useDoctor();
   const lost = patients.filter((p) => p.followUpStatus === STATUS_LOST);
-  const cards = [
-    { label: "Consultations today", value: "8", note: "3 remaining", icon: Stethoscope, tone: "blue", to: "/patients" as const },
-    { label: "Follow-ups this week", value: "12", note: `${lost.length} lost to follow-up`, icon: CalendarCheck, tone: "amber", to: "/follow-ups" as const },
-    { label: "Patients in care", value: "48", note: "4 seen this week", icon: Users, tone: "cyan", to: "/patients" as const },
-    { label: "Unread messages", value: "3", note: "2 patient replies", icon: MessageSquare, tone: "green", to: "/messages" as const },
-  ];
+  const items = [
+    ...lost.map((p) => ({ key: `lost-${p.id}`, icon: AlertCircle, title: `${p.name} — lost to follow-up`, note: `Follow-up was due ${p.followUp}`, go: () => onSelectPatient(p) })),
+    ...patients.flatMap((p) => { const d = latestDifficulty(p.checkins); return d ? [{ key: `msg-${p.id}`, icon: MessageSquare, title: `${p.name} reported difficulty`, note: d.message || d.status, go: () => onSelectPatient(p) }] : []; }),
+    ...patients.flatMap((p) => p.comparisons.filter((c) => c.status === "Pending").map((c) => ({ key: `inv-${p.id}-${c.name}`, icon: FlaskConical, title: `${p.name} — ${c.name} pending`, note: "Investigation to review", go: () => onSelectPatient(p) }))),
+  ].slice(0, 6);
   return <div className="pt-7">
-    <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-4"><DoctorAvatar className="size-16 ring-4 ring-card sm:size-20"/><div><p className="text-xs font-semibold uppercase tracking-widest text-primary">Practice overview</p><h2 className="mt-1 text-2xl font-bold text-navy">Good morning, {doctor.name}</h2><p className="mt-1 text-sm text-muted-foreground">Here’s what needs your attention on Friday, 25 September.</p></div></div>
+    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div><h2 className="text-2xl font-bold text-navy">Good morning, {doctor.name}</h2><p className="mt-1 text-sm text-muted-foreground">What requires your attention today, Friday 25 September.</p></div>
       <Button className="bg-navy hover:bg-navy/90" onClick={() => onNavigate("/follow-ups")}><CalendarDays/>View follow-ups</Button>
     </div>
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{cards.map((card) => <MetricCard key={card.label} label={card.label} value={card.value} note={card.note} date="View details" icon={card.icon} tone={card.tone} onClick={() => onNavigate(card.to)}/>)}</div>
-    <div className="mt-4 grid gap-4 xl:grid-cols-[1.15fr_.85fr]">
-      <section className="panel p-5"><div className="mb-4 flex items-center justify-between"><h2 className="section-title">Today’s schedule</h2><Button variant="ghost" size="sm" onClick={() => onNavigate("/follow-ups")}>View all <ArrowRight/></Button></div>{patients.map((item) => <Button key={item.id} variant="ghost" className="h-auto w-full justify-start gap-4 border-b border-border/50 px-1 py-3 text-left last:border-0" onClick={() => onSelectPatient(item)}><span className="w-16 text-xs font-semibold text-primary">{item.slot}</span><span className="grid size-9 place-items-center rounded-full bg-accent font-semibold text-primary">{initials(item.name)}</span><span className="min-w-0 flex-1"><span className="block font-medium">{item.name}</span><span className="block text-xs text-muted-foreground">{item.condition} · Follow-up</span></span><ChevronRight/></Button>)}</section>
-      <section className="panel p-5"><h2 className="section-title">Needs attention</h2><div className="mt-3 space-y-2"><AttentionRow icon={AlertCircle} title={`${lost.length} lost to follow-up`} note={lost.map((p) => p.name).join(", ") || "No patients"} onClick={() => onNavigate("/follow-ups")}/><AttentionRow icon={FlaskConical} title="3 results to review" note="Received since yesterday" onClick={() => onNavigate("/patients")}/><AttentionRow icon={MessageSquare} title="3 unread messages" note="Latest received 18 minutes ago" onClick={() => onNavigate("/messages")}/></div></section>
+    <div className="grid gap-8 xl:grid-cols-[1.3fr_.7fr]">
+      <section aria-labelledby="today-heading"><div className="mb-2 flex items-baseline justify-between"><h2 id="today-heading" className="text-lg font-semibold text-navy">Today’s consultations <span className="ml-1 text-sm font-normal text-muted-foreground">{patients.length}</span></h2></div>
+        <div className="divide-y divide-border/60 rounded-lg border border-border/70 bg-card">{patients.length === 0 && <p className="p-5 text-sm text-muted-foreground">No consultations are scheduled today.</p>}{patients.map((item) => <Button key={item.id} variant="ghost" className="h-auto w-full justify-start gap-4 rounded-none px-4 py-3.5 text-left" onClick={() => onSelectPatient(item)}><span className="w-14 text-sm font-semibold text-primary">{item.slot}</span><span className="min-w-0 flex-1"><span className="block text-base font-semibold">{item.name}</span><span className="block text-xs font-normal text-muted-foreground">{item.age} yrs · {item.condition}</span></span><span className="hidden text-xs font-normal text-muted-foreground sm:block">{item.appointmentStatus ?? "Scheduled"}</span><StatusBadge status={item.followUpStatus}/><ChevronRight/></Button>)}</div>
+      </section>
+      <section aria-labelledby="attention-dash-heading"><h2 id="attention-dash-heading" className="mb-2 text-lg font-semibold text-navy">Needs attention</h2>
+        {items.length === 0 ? <div className="rounded-lg bg-accent p-5"><p className="font-medium text-navy">You're all caught up</p><p className="text-sm text-muted-foreground">No follow-ups or results need your attention right now.</p></div> : <div className="space-y-1">{items.map((it) => <AttentionRow key={it.key} icon={it.icon} title={it.title} note={it.note} onClick={it.go}/>)}</div>}
+      </section>
     </div>
+    <p className="mt-8 border-t border-border/70 pt-4 text-sm text-muted-foreground"><button type="button" className="hover:text-navy hover:underline" onClick={() => onNavigate("/follow-ups")}>12 follow-ups this week</button> · <button type="button" className="hover:text-navy hover:underline" onClick={() => onNavigate("/patients")}>48 patients in care</button> · <button type="button" className="hover:text-navy hover:underline" onClick={() => onNavigate("/messages")}>3 unread messages</button></p>
   </div>;
 }
 
-function AttentionRow({ icon: Icon, title, note, onClick }: { icon: typeof AlertCircle; title: string; note: string; onClick: () => void }) { return <Button variant="ghost" className="h-auto w-full justify-start gap-3 rounded-lg bg-muted/60 p-3 text-left" onClick={onClick}><span className="grid size-9 place-items-center rounded-lg bg-card text-primary"><Icon/></span><span className="flex-1"><span className="block font-medium">{title}</span><span className="block text-xs font-normal text-muted-foreground">{note}</span></span><ChevronRight/></Button>; }
+function AttentionRow({ icon: Icon, title, note, onClick }: { icon: typeof AlertCircle; title: string; note: string; onClick: () => void }) { return <Button variant="ghost" className="h-auto w-full justify-start gap-3 rounded-lg p-3 text-left hover:bg-muted/60" onClick={onClick}><span className="grid size-9 place-items-center rounded-lg bg-card text-primary"><Icon/></span><span className="flex-1"><span className="block font-medium">{title}</span><span className="block text-xs font-normal text-muted-foreground">{note}</span></span><ChevronRight/></Button>; }
 
 function FollowUpsPage({ onAssign, onOpenPatient }: { onAssign: () => void; onOpenPatient: (p: Patient) => void }) {
   const patients = usePatients();

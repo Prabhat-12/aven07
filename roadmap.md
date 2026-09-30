@@ -30,3 +30,10 @@
 - [x] Add safe, isolated guest onboarding and three switchable role previews
 - [x] Refine sign-in and real onboarding presentation and mismatch recovery
 - [x] Verify guest flows, role isolation and mobile layout
+
+# PRD iteration (approved plan)
+- [x] Doctor: dashboard hierarchy, layered patient overview, check-ins and care tasks wired
+- [x] Patient: Home / My care / Appointments / Notes with check-in
+- [x] Receptionist: today's appointments, operational actions, operational-only record
+- [x] Guest preview verified on desktop for all roles
+- [ ] Real-role sign-in checks (blocked: email confirmation needs a real inbox)

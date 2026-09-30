@@ -5,9 +5,11 @@ import { followUpStatusFor, formatIso, type Comparison, type Metric, type Patien
 const images: Record<string, string> = { asha: ashaImage };
 
 export async function loadDoctorPatients(): Promise<Patient[]> {
-  const [patientsRes, notesRes] = await Promise.all([
+  const [patientsRes, notesRes, tasksRes, checkinsRes] = await Promise.all([
     supabase.from("patients").select("*, patient_clinical(*)"),
     supabase.from("patient_notes").select("*").order("note_date", { ascending: false }),
+    supabase.from("care_tasks").select("*").order("due_date", { ascending: true, nullsFirst: true }),
+    supabase.from("patient_checkins").select("*").order("created_at", { ascending: false }),
   ]);
   if (patientsRes.error) throw patientsRes.error;
   const notes = notesRes.data ?? [];
@@ -29,6 +31,9 @@ export async function loadDoctorPatients(): Promise<Patient[]> {
       activities: (data["activities"] as Patient["activities"]) ?? [], visits: (data["visits"] as Patient["visits"]) ?? [],
       notes: notes.filter((n) => n.patient_id === row.id).map((n) => ({ id: n.id, date: formatIso(n.note_date), author: n.author_name, text: n.text })),
       rawData: data,
+      careTasks: (tasksRes.data ?? []).filter((t) => t.patient_id === row.id).map((t) => ({ id: t.id, title: t.title, detail: t.detail, dueIso: t.due_date, status: t.status })),
+      checkins: (checkinsRes.data ?? []).filter((c) => c.patient_id === row.id).map((c) => ({ id: c.id, status: c.status, message: c.message, date: formatIso(c.created_at.slice(0, 10)) })),
+      appointmentStatus: row.appointment_status,
     });
   }
   return list.sort((a, b) => a.slot.localeCompare(b.slot));
@@ -48,5 +53,10 @@ export async function saveClinicalPatch(patient: Patient, patch: Record<string, 
 
 export async function addPatientNote(patientId: string, author: string, text: string) {
   const { error } = await supabase.from("patient_notes").insert({ patient_id: patientId, author_name: author, text });
+  if (error) throw error;
+}
+
+export async function addCareTask(patientId: string, title: string, detail = "", dueIso: string | null = null) {
+  const { error } = await supabase.from("care_tasks").insert({ patient_id: patientId, title, detail, due_date: dueIso });
   if (error) throw error;
 }
