@@ -28,7 +28,7 @@ function seriesReadings(series: Point[], latestDate: string): InvestigationReadi
   const reversed = [...series].reverse().map((point) => {
     const month = months.indexOf(point.month.slice(0, 3));
     if (month < 0 || !Number.isFinite(point.value)) return null;
-    if (month >= nextMonth) year -= 1;
+    if (month > nextMonth) year -= 1;
     nextMonth = month;
     const date = new Date(year, month, 1);
     return { date, label: `${months[month]} ${year}`, value: point.value };

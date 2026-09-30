@@ -35,7 +35,7 @@ export function InvestigationTrendsView({ patient, onAdd, onOverview }: Props) {
   const [category, setCategory] = useState<InvestigationCategory>(records[0]?.category ?? "HbA1c");
   const [selectedName, setSelectedName] = useState(records[0]?.item.name ?? "");
   const [range, setRange] = useState("6");
-  const selected = records.find((record) => record.item.name === selectedName) ?? records[0];
+  const selected = records.find((record) => record.item.name === selectedName);
   const categoryRecords = records.filter((record) => record.category === category);
   const shown = selected ? visibleReadings(selected.readings, Number(range)) : [];
   const change = readingChange(shown);
