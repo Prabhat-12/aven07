@@ -151,7 +151,7 @@ function DashboardShell({ initialPage, guest }: { initialPage: WorkspacePage; gu
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} active={initialPage} onNavigate={guest ? goTo : undefined} />
+      <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} active={initialPage} {...(guest ? { onNavigate: goTo } : {})} />
       <main className="min-h-screen lg:pl-48">
         <TopHeader search={search} setSearch={setSearch} matches={matches} onSelect={selectPatient} onMenu={() => setMobileNav(true)} onNotifications={() => setNotificationsOpen(true)} onProfile={() => guest ? setFeedback("Guest doctor · fictional sample records") : setProfileOpen(true)} />
         <div className="mx-auto w-full max-w-[1600px] px-3 pb-24 sm:px-5 lg:px-7 lg:pb-8">
