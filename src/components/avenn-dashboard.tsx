@@ -41,12 +41,6 @@ const useDoctor = () => useContext(DoctorCtx);
 
 let lastSelectedPatientId = "";
 
-const inbox = [
-  { name: "Asha Sharma", preview: "I have uploaded this week’s glucose readings.", time: "10:42", unread: 2 },
-  { name: "Raj Mehta", preview: "Should I continue the same dose?", time: "09:18", unread: 1 },
-  { name: "Neha Gupta", preview: "My lab appointment is confirmed for Monday.", time: "Yesterday", unread: 0 },
-  { name: "Vikram Singh", preview: "Thank you, doctor.", time: "Yesterday", unread: 0 },
-];
 const tabIcons = { Overview: Home, Investigations: FlaskConical, "Care Plan": ClipboardCheck, "Previous Visits": Clock3, Notes: MessageSquare };
 const initials = (name: string) => name.split(" ").map((part) => part[0]).join("");
 
@@ -420,7 +414,9 @@ function PracticeInvestigations({ onAssign, onOpenPatient }: { onAssign: () => v
 }
 
 function MessagesPage() {
-  const initialThread = inbox[0] ?? { name: "Asha Sharma", preview: "", time: "", unread: 0 };
+  const patients = usePatients();
+  const inbox = patients.map((patient, index) => ({ name: patient.name, preview: ["I have uploaded this week’s glucose readings.", "Should I continue the same dose?", "My lab appointment is confirmed for Monday.", "Thank you, doctor."][index % 4] ?? "Hello doctor.", time: ["10:42", "09:18", "Yesterday"][index % 3] ?? "Yesterday", unread: index === 0 ? 2 : index === 1 ? 1 : 0 }));
+  const initialThread = inbox[0] ?? { name: "Patient", preview: "", time: "", unread: 0 };
   const [selected, setSelected] = useState(initialThread);
   const [draft, setDraft] = useState("");
   const [sent, setSent] = useState<string[]>([]);
