@@ -17,17 +17,18 @@ function exercise(bmi: number) {
   return { title: "Low-impact and regular", body: "Begin with 10 to 15 minute walks after meals, building toward 30 minutes. Choose low-impact options like swimming or cycling." };
 }
 
-export function PatientHome() {
+export function PatientHome({ guestRecord }: { guestRecord?: { name: string; follow_up_date: string; follow_up_status: string; note: string } } = {}) {
   const account = useAccount();
   const signOut = useSignOut();
   const [emergency, setEmergency] = useState(false);
   const [sent, setSent] = useState(false);
   const profile = account.data?.profile;
-  const bmi = profile?.height_cm && profile?.weight_kg ? profile.weight_kg / Math.pow(profile.height_cm / 100, 2) : null;
+  const bmi = guestRecord ? 68 / Math.pow(1.62, 2) : profile?.height_cm && profile?.weight_kg ? profile.weight_kg / Math.pow(profile.height_cm / 100, 2) : null;
   const plan = bmi ? exercise(bmi) : null;
 
   const record = useQuery({
     queryKey: ["my-record"],
+    enabled: !guestRecord,
     queryFn: async () => {
       const [p, n] = await Promise.all([
         supabase.from("patients").select("id, name, follow_up_date, follow_up_status").maybeSingle(),
@@ -45,17 +46,17 @@ export function PatientHome() {
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between border-b border-border/60 bg-card px-4 py-3 sm:px-8">
         <span className="text-2xl font-bold text-navy">Avenn</span>
-        <Button variant="outline" size="sm" onClick={signOut}><LogOut />Sign out</Button>
+        {!guestRecord && <Button variant="outline" size="sm" onClick={signOut}><LogOut />Sign out</Button>}
       </header>
       <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div><h1 className="text-2xl font-bold text-navy">Hello, {profile?.full_name?.split(" ")[0] ?? "there"}</h1><p className="mt-1 text-sm text-muted-foreground">Your care guidance and next visit.</p></div>
+           <div><h1 className="text-2xl font-bold text-navy">Hello, {guestRecord?.name.split(" ")[0] ?? profile?.full_name?.split(" ")[0] ?? "there"}</h1><p className="mt-1 text-sm text-muted-foreground">Your care guidance and next visit.</p></div>
           <Button className="bg-red-600 text-white hover:bg-red-700" onClick={() => { setEmergency(true); setSent(false); }}><PhoneCall />Emergency (off-hours)</Button>
         </div>
         <section className="panel flex flex-wrap items-center gap-4 p-5">
           <span className="grid size-12 place-items-center rounded-xl bg-accent text-primary"><CalendarDays /></span>
-          <div className="flex-1"><p className="text-xs text-muted-foreground">Next follow-up</p><strong className="text-lg text-navy">{record.data?.patient ? formatIso(record.data.patient.follow_up_date) : "—"}</strong></div>
-          {record.data?.patient && <StatusBadge status={record.data.patient.follow_up_status} />}
+           <div className="flex-1"><p className="text-xs text-muted-foreground">Next follow-up</p><strong className="text-lg text-navy">{guestRecord ? formatIso(guestRecord.follow_up_date) : record.data?.patient ? formatIso(record.data.patient.follow_up_date) : "—"}</strong></div>
+           {(guestRecord || record.data?.patient) && <StatusBadge status={guestRecord?.follow_up_status ?? record.data?.patient?.follow_up_status ?? ""} />}
         </section>
         <div className="grid gap-4 sm:grid-cols-2">
           {card(<Apple />, "Diet", "Fill half your plate with vegetables, choose whole grains, and keep sweet drinks and refined sugar for rare occasions.")}
@@ -71,8 +72,7 @@ export function PatientHome() {
         <section className="panel p-5">
           <h2 className="font-semibold text-navy">Notes from your doctor</h2>
           <div className="mt-3 divide-y divide-border/60">
-            {(record.data?.notes ?? []).length === 0 && <p className="py-3 text-sm text-muted-foreground">No notes yet.</p>}
-            {record.data?.notes.map((n) => <article key={n.id} className="py-3"><p className="text-xs font-semibold text-primary">{formatIso(n.note_date)} · {n.author_name}</p><p className="mt-1 text-sm text-muted-foreground">{n.text}</p></article>)}
+             {guestRecord ? <article className="py-3"><p className="text-xs font-semibold text-primary">18 Sep 2026 · Dr. Isha Mehta</p><p className="mt-1 text-sm text-muted-foreground">{guestRecord.note}</p></article> : <>{(record.data?.notes ?? []).length === 0 && <p className="py-3 text-sm text-muted-foreground">No notes yet.</p>}{record.data?.notes.map((n) => <article key={n.id} className="py-3"><p className="text-xs font-semibold text-primary">{formatIso(n.note_date)} · {n.author_name}</p><p className="mt-1 text-sm text-muted-foreground">{n.text}</p></article>)}</>}
           </div>
         </section>
       </main>
