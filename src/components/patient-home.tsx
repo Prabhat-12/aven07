@@ -83,7 +83,7 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
     const done = st.tone === "done";
     return (
       <li className="flex items-start gap-3 py-3">
-        <button type="button" aria-label={done ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`} onClick={() => toggleTask.mutate(task)} className={cn("mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border", done ? "border-primary bg-primary text-foreground-foreground" : "border-muted-foreground/50 hover:border-primary")}>{done && <Check className="size-3.5" />}</button>
+        <button type="button" aria-label={done ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`} onClick={() => toggleTask.mutate(task)} className={cn("mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border", done ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50 hover:border-primary")}>{done && <Check className="size-3.5" />}</button>
         <div className="min-w-0 flex-1"><p className={cn("font-medium text-navy", done && "text-muted-foreground line-through")}>{task.title}</p><p className="text-xs text-muted-foreground">{task.detail}{task.dueIso && !done ? ` · Due ${formatIso(task.dueIso)}` : ""}</p></div>
         <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium", st.tone === "overdue" ? "bg-critical-surface text-critical" : st.tone === "due" ? "bg-warning-surface text-warning" : "bg-muted text-muted-foreground")}><Icon className="size-3" />{st.label}</span>
       </li>
