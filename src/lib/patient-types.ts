@@ -12,6 +12,7 @@ export type Patient = {
   dbId: string; name: string; id: string; phone: string; age: number; gender: string; condition: string; image?: string | undefined;
   tags: string[]; slot: string; followUp: string; followUpIso: string; followUpStatus: string; summary: string;
   metrics: Metric[]; trend: Point[]; creatTrend: Point[]; cholesterol: { value: number; date: string; trend: Point[] };
+  investigationTrends?: Record<string, Point[]>;
   comparisons: Comparison[]; tasks: Task[]; medications: Medication[];
   activities: { date: string; title: string; note: string }[];
   visits: { date: string; title: string; summary: string; actions: string[] }[];

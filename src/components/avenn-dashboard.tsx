@@ -23,6 +23,7 @@ import { addCareTask, addPatientNote, loadDoctorPatients, saveClinicalPatch, sav
 import { latestDifficulty, progressOf, taskState } from "@/lib/care-loop";
 import { STATUS_LOST, followUpStatusFor, type Comparison, type Medication, type Metric, type Note, type Patient, type Point, type Task } from "@/lib/patient-types";
 import { StatusBadge } from "@/components/status-badge";
+import { InvestigationTrendsView } from "@/components/investigation-trends-view";
 import priyaImage from "@/assets/priya-sharma.jpg";
 
 type Tab = "Overview" | "Investigations" | "Care Plan" | "Previous Visits" | "Notes";
@@ -81,7 +82,6 @@ function DashboardShell({ initialPage, guest }: { initialPage: WorkspacePage; gu
   const [currentId, setCurrentId] = useState((patients.find((p) => p.id === lastSelectedPatientId) ?? patients[0]!).id);
   const currentPatient = patients.find((p) => p.id === currentId) ?? patients[0]!;
   const [mobileNav, setMobileNav] = useState(false);
-  const [investigationFilter, setInvestigationFilter] = useState("All");
   const [notes, setNotes] = useState<Note[]>(currentPatient.notes);
   const [tasks, setTasks] = useState<Task[]>(currentPatient.tasks);
   const [medications, setMedications] = useState<Medication[]>(currentPatient.medications);
@@ -163,7 +163,7 @@ function DashboardShell({ initialPage, guest }: { initialPage: WorkspacePage; gu
             <PatientTabs value={tab} onChange={setTab} />
             <div className="pt-4">
               {tab === "Overview" && <Overview patient={currentPatient} onDetail={setDetail} tasks={tasks} setTasks={persistTasks} onTab={setTab} onSelectPatient={selectPatient} />}
-              {tab === "Investigations" && <InvestigationsPage patient={currentPatient} filter={investigationFilter} setFilter={setInvestigationFilter} onAdd={() => setSimpleModal("investigation")} />}
+              {tab === "Investigations" && <InvestigationTrendsView patient={currentPatient} onAdd={() => setSimpleModal("investigation")} onOverview={() => setTab("Overview")} />}
               {tab === "Care Plan" && <CarePlan patient={currentPatient} medications={medications} tasks={tasks} setTasks={persistTasks} onAdd={setSimpleModal} onFollow={() => setFollowOpen(true)} />}
               {tab === "Previous Visits" && <VisitsPage patient={currentPatient} onDetail={setDetail} />}
               {tab === "Notes" && <NotesPage patient={currentPatient} notes={notes} onAdd={() => setSimpleModal("note")} />}
@@ -343,64 +343,7 @@ function DeltaChip({ item }: { item: Comparison }) {
   return <span className={cn("flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium", change.flat ? "bg-muted text-muted-foreground" : change.improved ? "bg-success-surface text-success" : "bg-critical-surface text-critical")}><Icon className="size-3"/>{change.flat ? "No change" : `${change.diff > 0 ? "+" : ""}${change.diff}${item.unit}`}</span>;
 }
 
-function ComparisonCard({ item, open, onToggle }: { item: Comparison; open: boolean; onToggle: () => void }) {
-  const Icon = iconFor(item.icon);
-  const change = changeOf(item);
-  const scale = (value: number) => `${Math.min(100, Math.max(3, (value / (item.max || 1)) * 100))}%`;
-  return <article className={cn("rounded-lg border border-border/70 bg-card transition-shadow", open && "shadow-soft")}>
-    <Button variant="ghost" onClick={onToggle} aria-expanded={open} className="h-auto w-full items-center justify-start gap-4 whitespace-normal rounded-xl p-4 text-left sm:p-5">
-      <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-foreground"><Icon className="size-5"/></span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-base font-semibold text-navy">{item.name}</span>
-        <span className="block text-xs font-normal text-muted-foreground">{item.latest !== null ? `Latest ${item.latestDate}` : item.latestDate}</span>
-      </span>
-      <span className="hidden text-right sm:block"><span className="block text-xs text-muted-foreground">Previous</span><strong className="text-sm text-muted-foreground">{item.previous !== null ? `${item.previous}${item.unit}` : item.previousLabel}</strong></span>
-      <span className="text-right"><span className="block text-xs text-muted-foreground">Latest</span><strong className="text-lg text-navy">{item.latest !== null ? `${item.latest}${item.unit}` : item.latestLabel}</strong></span>
-      <DeltaChip item={item}/>
-      <ChevronDown className={cn("size-5 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")}/>
-    </Button>
-    {open && <div className="space-y-5 border-t border-border/60 p-4 sm:p-5">
-      {item.latest !== null && item.previous !== null ? <>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3"><span className="w-24 shrink-0 text-xs text-muted-foreground">Previous</span><span className="h-6 flex-1 overflow-hidden rounded-full bg-muted"><span className="block h-full rounded-full bg-border" style={{ width: scale(item.previous) }}/></span><span className="w-24 shrink-0 text-right text-sm text-muted-foreground">{item.previous}{item.unit}</span></div>
-          <div className="flex items-center gap-3"><span className="w-24 shrink-0 text-xs font-medium text-navy">Latest</span><span className="h-6 flex-1 overflow-hidden rounded-full bg-muted"><span className="block h-full rounded-full bg-success" style={{ width: scale(item.latest) }}/></span><span className="w-24 shrink-0 text-right text-sm font-semibold text-navy">{item.latest}{item.unit}</span></div>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <ContextTile label={`Previous · ${item.previousDate}`} value={`${item.previous}${item.unit}`}/>
-          <ContextTile label={`Latest · ${item.latestDate}`} value={`${item.latest}${item.unit}`}/>
-          <ContextTile label="Change since last visit" value={change ? (change.flat ? "No change" : `${change.diff > 0 ? "+" : ""}${change.diff}${item.unit} (${change.percent > 0 ? "+" : ""}${change.percent}%)`) : item.status}/>
-        </div>
-        <p className="rounded-xl bg-information-surface p-4 text-sm text-information">{item.note}</p>
-      </> : <div className="grid gap-3 sm:grid-cols-3">
-        <ContextTile label={`Previous · ${item.previousDate}`} value={item.previousLabel || "—"}/>
-        <ContextTile label="Latest" value={item.latestLabel || item.status}/>
-        <ContextTile label="Status" value={item.status}/>
-        <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground sm:col-span-3">{item.note}</p>
-      </div>}
-    </div>}
-  </article>;
-}
-
 function PageIntro({ title, description, action }: { title: string; description: string; action?: ReactNode }) { return <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-semibold uppercase tracking-widest text-foreground">Patient workspace</p><h2 className="mt-1 text-2xl font-bold text-navy">{title}</h2><p className="mt-1 text-sm text-muted-foreground">{description}</p></div>{action}</div>; }
-
-function InvestigationsPage({ patient, filter, setFilter, onAdd }: { patient: Patient; filter: string; setFilter: (v: string) => void; onAdd: () => void }) {
-  const [open, setOpen] = useState<string[]>([patient.comparisons[0]?.name ?? ""]);
-  const statuses = ["All", ...Array.from(new Set(patient.comparisons.map((c) => c.status)))];
-  const shown = patient.comparisons.filter((c) => filter === "All" || c.status === filter);
-  const improved = patient.comparisons.filter((c) => changeOf(c)?.improved).length;
-  const worse = patient.comparisons.filter((c) => { const change = changeOf(c); return change && !change.improved && !change.flat; }).length;
-  const pending = patient.comparisons.filter((c) => c.latest === null).length;
-  return <div className="w-full">
-    <PageIntro title="Investigations" description={`Compare ${patient.name.split(" ")[0]}’s previous consultation with the latest results.`} action={<Button onClick={onAdd}><Plus/>Assign investigation</Button>}/>
-    <div className="grid gap-3 sm:grid-cols-3">
-      <SummaryTile icon={TrendingDown} value={String(improved)} label="Improved since last visit" tone="metric-green"/>
-      <SummaryTile icon={TrendingUp} value={String(worse)} label="Worsened since last visit" tone="metric-amber"/>
-      <SummaryTile icon={Clock3} value={String(pending)} label="Awaiting result" tone="metric-blue"/>
-    </div>
-    <div className="mt-4 flex flex-wrap items-center gap-2">{statuses.map((x) => <Button key={x} size="sm" variant={filter === x ? "default" : "outline"} onClick={() => setFilter(x)}>{x}</Button>)}<Button size="sm" variant="ghost" className="ml-auto" onClick={() => setOpen(open.length ? [] : patient.comparisons.map((c) => c.name))}>{open.length ? "Collapse all" : "Expand all"}</Button></div>
-    <div className="mt-4 space-y-3">{shown.length ? shown.map((item) => <ComparisonCard key={item.name} item={item} open={open.includes(item.name)} onToggle={() => setOpen((current) => current.includes(item.name) ? current.filter((n) => n !== item.name) : [...current, item.name])}/>) : <EmptyState title="No investigations found" note="Try a different status filter."/>}</div>
-  </div>;
-}
 
 function CarePlan({ patient, medications, tasks, setTasks, onAdd, onFollow }: { patient: Patient; medications: Medication[]; tasks: Task[]; setTasks: React.Dispatch<React.SetStateAction<Task[]>>; onAdd: (m: SimpleModal) => void; onFollow: () => void }) {
   return <><PageIntro title="Care Plan" description={`Manage the treatment plan agreed with ${patient.name.split(" ")[0]}.`}/><div className="grid gap-4 lg:grid-cols-2"><CareSection icon={<Pill/>} title="Current Medications" action="Add medication" onAction={() => onAdd("medication")}>{medications.map((m) => <div key={m.name} className="data-row"><div><strong>{m.name}</strong><p>{m.dosage} · {m.frequency}</p></div><div className="flex items-center gap-2"><span className="status-dot"><Check/> {m.status}</span><Button size="sm" variant="outline" onClick={() => onAdd("medication")}>Edit</Button></div></div>)}</CareSection><CareSection icon={<ClipboardCheck/>} title="Patient Tasks" action="Add task" onAction={() => onAdd("task")}>{tasks.map((t, index) => <Button key={t.title} variant="ghost" className="data-row h-auto w-full text-left" onClick={() => t.kind === "follow-up" ? onFollow() : setTasks((current) => current.map((task, i) => i === index ? {...task, done: !task.done} : task))}><div><strong className={cn(t.done && "text-muted-foreground line-through")}>{t.title}</strong><p>{taskNote(t, patient)}</p></div>{t.done ? <CheckCheck className="text-foreground"/> : <ChevronRight/>}</Button>)}</CareSection><CareSection icon={<FlaskConical/>} title="Investigations" action="Assign investigation" onAction={() => onAdd("investigation")}>{patient.comparisons.slice(0,3).map((i) => <Button key={i.name} variant="ghost" className="data-row h-auto w-full text-left" onClick={() => onAdd("investigation")}><div><strong>{i.name}</strong><p>{i.latest === null ? "Awaiting result" : `Last ${i.latestDate}`}</p></div><span className="text-sm text-muted-foreground">{i.status}</span></Button>)}</CareSection></div></>;
