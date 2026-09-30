@@ -23,6 +23,11 @@ function parseDate(label: string): Date | null {
 function seriesReadings(series: Point[], latestDate: string): InvestigationReading[] {
   const last = parseDate(latestDate);
   if (!last) return [];
+  // Legacy trend points contain month labels but no year or sample day.
+  // A repeated month would make the chronology ambiguous, so only graph a
+  // unique month sequence. The two explicitly dated comparison values remain usable.
+  const monthIndexes = series.map((point) => months.indexOf(point.month.slice(0, 3)));
+  if (monthIndexes.some((month) => month < 0) || new Set(monthIndexes).size !== monthIndexes.length || monthIndexes.at(-1) !== last.getMonth()) return [];
   let year = last.getFullYear();
   let nextMonth = last.getMonth() + 1;
   const reversed = [...series].reverse().map((point) => {
@@ -60,7 +65,8 @@ export function investigationRecords(patient: Patient): InvestigationRecord[] {
       : /creatinine/i.test(item.name) ? patient.creatTrend
       : /cholesterol/i.test(item.name) ? patient.cholesterol.trend
       : patient.investigationTrends?.[item.name] ?? [];
-    const readings = series.length ? seriesReadings(series, item.latestDate) : comparisonReadings(item);
+    const datedSeries = seriesReadings(series, item.latestDate);
+    const readings = datedSeries.length ? datedSeries : comparisonReadings(item);
     return { item, category: categoryFor(item.name), readings };
   });
 }
