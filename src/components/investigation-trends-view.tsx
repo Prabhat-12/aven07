@@ -42,7 +42,14 @@ export function InvestigationTrendsView({ patient, onAdd, onOverview }: Props) {
     setRange("6");
   }, [patient.id]);
   useEffect(() => {
-    categoryButtons.current[category]?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    const button = categoryButtons.current[category];
+    const scroller = button?.parentElement;
+    if (button && scroller) {
+      const buttonBounds = button.getBoundingClientRect();
+      const scrollerBounds = scroller.getBoundingClientRect();
+      if (buttonBounds.right > scrollerBounds.right) scroller.scrollLeft += buttonBounds.right - scrollerBounds.right;
+      if (buttonBounds.left < scrollerBounds.left) scroller.scrollLeft += buttonBounds.left - scrollerBounds.left;
+    }
   }, [category]);
   const selected = records.find((record) => record.item.name === selectedName);
   const categoryRecords = records.filter((record) => record.category === category);
