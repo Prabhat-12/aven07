@@ -87,18 +87,18 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
       </header>
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-8">
         {!approved ? (
-          <section className="panel mx-auto mt-10 max-w-lg p-8 text-center"><Clock className="mx-auto size-8 text-primary" /><h1 className="mt-4 text-xl font-bold text-navy">Waiting for approval</h1><p className="mt-2 text-sm text-muted-foreground">Your doctor needs to approve your account before you can see the follow-up schedule. Check back once they have.</p><Button className="mt-5" variant="outline" onClick={() => account.refetch()}>Check again</Button></section>
+          <section className="panel mx-auto mt-10 max-w-lg p-8 text-center"><Clock className="mx-auto size-8 text-foreground" /><h1 className="mt-4 text-xl font-bold text-navy">Waiting for approval</h1><p className="mt-2 text-sm text-muted-foreground">Your doctor needs to approve your account before you can see the follow-up schedule. Check back once they have.</p><Button className="mt-5" variant="outline" onClick={() => account.refetch()}>Check again</Button></section>
         ) : (
           <>
             <h1 className="text-2xl font-bold text-navy">Follow-up schedule</h1>
             <p className="mt-1 text-sm text-muted-foreground">Manage appointments and follow-up coordination.</p>
-            <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground"><ShieldCheck className="size-4 text-primary" />You can see patient names and follow-up dates only.</p>
+            <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground"><ShieldCheck className="size-4 text-foreground" />You can see patient names and follow-up dates only.</p>
             <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 border-y border-border/70 py-4 sm:grid-cols-4">
               {[["Due this week", count("Due this week")], ["Upcoming", count("Upcoming")], [STATUS_LOST, count(STATUS_LOST)], ["Today's appointments", today.length]].map(([label, value]) => (
                 <div key={label}><dd className="text-2xl font-semibold text-navy">{value}</dd><dt className="text-xs text-muted-foreground">{label}</dt></div>
               ))}
             </dl>
-            {feedback && <p role="status" className="mt-4 rounded-md border border-primary/20 bg-accent px-4 py-3 text-sm text-navy">{feedback}</p>}
+            {feedback && <p role="status" className="mt-4 rounded-md border border-border bg-quiet-lime px-4 py-3 text-sm text-navy">{feedback}</p>}
 
             <section className="mt-7" aria-labelledby="today-heading">
               <h2 id="today-heading" className="text-lg font-semibold text-navy">Today's appointments</h2>
@@ -107,7 +107,7 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
                 {!loading && today.length === 0 && <p className="py-5 text-sm text-muted-foreground">No appointments are scheduled for today.</p>}
                 {today.map((r) => (
                   <div key={r.id} className="flex flex-wrap items-center gap-3 py-3">
-                    <span className="w-14 text-sm font-semibold text-primary">{r.appointment_time}</span>
+                    <span className="w-14 text-sm font-semibold text-foreground">{r.appointment_time}</span>
                     <button type="button" className="min-w-32 flex-1 text-left font-medium text-navy hover:underline" onClick={() => setRecord(r)}>{r.name}</button>
                     <Status s={r.appointment_status} />
                     <Actions r={r} />
@@ -126,7 +126,7 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
                 {!loading && visible.length === 0 && (filter === STATUS_LOST ? <div className="py-8 text-center"><p className="font-medium text-navy">No overdue follow-ups</p><p className="text-sm text-muted-foreground">Everyone is currently on schedule.</p></div> : <p className="py-6 text-center text-sm text-muted-foreground">No patients match this view.</p>)}
                 {visible.map((r) => (
                   <div key={r.id} className="flex flex-wrap items-center gap-3 py-3">
-                    <span className="grid size-9 place-items-center rounded-full bg-accent text-sm font-semibold text-primary">{r.name.split(" ").map((p) => p[0]).join("").slice(0, 2)}</span>
+                    <span className="grid size-9 place-items-center rounded-full bg-secondary text-sm font-semibold text-foreground">{r.name.split(" ").map((p) => p[0]).join("").slice(0, 2)}</span>
                     <button type="button" className="min-w-32 flex-1 text-left font-medium text-navy hover:underline" onClick={() => setRecord(r)}>{r.name}</button>
                     <span className="flex items-center gap-2 text-sm text-muted-foreground"><CalendarDays className="size-4" />{formatIso(r.follow_up_date)}</span>
                     <StatusBadge status={r.follow_up_status} />
@@ -148,7 +148,7 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
 
       <Dialog open={!!contact} onOpenChange={(o) => !o && setContact(null)}>
         <DialogContent className="sm:max-w-md"><DialogHeader><DialogTitle>Contact patient</DialogTitle><DialogDescription>Use this only to arrange or confirm an appointment.</DialogDescription></DialogHeader>
-          <p className="flex items-center gap-2 text-navy"><Phone className="size-4 text-primary" /><strong>{contact?.name}</strong></p>
+          <p className="flex items-center gap-2 text-navy"><Phone className="size-4 text-foreground" /><strong>{contact?.name}</strong></p>
           <p className="text-sm text-muted-foreground">{contact?.contact_phone ?? "No phone number on record."}</p>
           <Button variant="outline" onClick={() => { if (contact) setStatus(contact, contact.appointment_status === "Scheduled" ? "Reschedule requested" : contact.appointment_status); setContact(null); }}>Note: patient contacted</Button>
         </DialogContent>
