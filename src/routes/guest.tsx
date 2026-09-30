@@ -55,7 +55,7 @@ function Guest() {
 
   if (entered && role) {
     const record = patients[0];
-    const schedule = patients.map((p) => ({ id: p.id, name: p.name, follow_up_date: p.followUpIso, follow_up_status: p.followUpStatus }));
+    const schedule = patients.map((p) => ({ id: p.id, name: p.name, follow_up_date: p.followUpIso, follow_up_status: p.followUpStatus, appointment_status: p.appointmentStatus ?? "Scheduled", appointment_time: p.slot, contact_phone: "Not available in guest preview" }));
     return <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-[60] flex flex-wrap items-center justify-between gap-2 border-b border-primary/20 bg-accent px-4 py-2 text-sm sm:px-8">
         <div><strong className="text-navy">Guest preview · {roles.find((r) => r.id === role)?.title}</strong><span className="ml-2 hidden text-muted-foreground sm:inline">Fictional examples; changes reset when you leave.</span></div>
@@ -63,7 +63,7 @@ function Guest() {
       </div>
       <Suspense fallback={<div className="grid min-h-[60vh] place-items-center text-muted-foreground">Opening preview…</div>}>
         {role === "doctor" && <GuestDoctorDashboard patients={patients} page={page} onPageChange={setPage} onPatientsChange={setPatients} name={form.fullName} specialty={form.specialty} />}
-        {role === "receptionist" && <ReceptionistView guestRows={schedule} guestName={form.fullName} onGuestRowsChange={(rows) => setPatients((current) => current.map((p) => { const row = rows.find((r) => r.id === p.id); return row ? { ...p, followUpIso: row.follow_up_date ?? "", followUpStatus: row.follow_up_status } : p; }))} />}
+        {role === "receptionist" && <ReceptionistView guestRows={schedule} guestName={form.fullName} onGuestRowsChange={(rows) => setPatients((current) => current.map((p) => { const row = rows.find((r) => r.id === p.id); return row ? { ...p, followUpIso: row.follow_up_date ?? "", followUpStatus: row.follow_up_status, appointmentStatus: row.appointment_status } : p; }))} />}
         {role === "patient" && record && <PatientHome guest={{ name: form.fullName, heightCm: Number(form.height), weightKg: Number(form.weight), patient: record, onChange: (next) => setPatients((current) => current.map((p) => (p.id === next.id ? next : p))) }} />}
       </Suspense>
     </div>;
