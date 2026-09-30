@@ -27,6 +27,6 @@
 - [ ] Verify each role with real sign-ins (blocked: email confirmation needs a real inbox)
 
 # Judge guest journey (approved)
-- [ ] Add safe, isolated guest onboarding and three switchable role previews
-- [ ] Refine sign-in and real onboarding presentation and mismatch recovery
-- [ ] Verify guest flows, role isolation and mobile layout
+- [x] Add safe, isolated guest onboarding and three switchable role previews
+- [x] Refine sign-in and real onboarding presentation and mismatch recovery
+- [x] Verify guest flows, role isolation and mobile layout

@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount, useSignOut } from "@/lib/account";
 import { addPatientNote, loadDoctorPatients, saveClinicalPatch, saveFollowUp } from "@/lib/doctor-data";
-import { STATUS_LOST, type Comparison, type Medication, type Metric, type Note, type Patient, type Point, type Task } from "@/lib/patient-types";
+import { STATUS_LOST, followUpStatusFor, type Comparison, type Medication, type Metric, type Note, type Patient, type Point, type Task } from "@/lib/patient-types";
 import { StatusBadge } from "@/components/status-badge";
 import priyaImage from "@/assets/priya-sharma.jpg";
 
@@ -123,7 +123,7 @@ function DashboardShell({ initialPage, guest }: { initialPage: WorkspacePage; gu
   const saveFollow = async () => {
     try {
       if (guest) {
-        guest.onPatientsChange(patients.map((p) => p.id === currentPatient.id ? { ...p, followUpIso: followDate, followUp: new Date(`${followDate}T00:00:00Z`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }), followUpStatus: "Upcoming" } : p));
+        guest.onPatientsChange(patients.map((p) => p.id === currentPatient.id ? { ...p, followUpIso: followDate, followUp: new Date(`${followDate}T00:00:00Z`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }), followUpStatus: followUpStatusFor(followDate) } : p));
       } else {
         await saveFollowUp(currentPatient.dbId, followDate);
         await queryClient.invalidateQueries({ queryKey: ["doctor-patients"] });
