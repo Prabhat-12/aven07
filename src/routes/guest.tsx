@@ -62,7 +62,7 @@ function Guest() {
         <div className="flex items-center gap-2"><Button variant="outline" size="sm" onClick={() => setEntered(false)}><ArrowLeft />Details</Button><Button variant="outline" size="sm" onClick={() => { setEntered(false); setRole(null); }}><UserRound />Switch role</Button><Button variant="ghost" size="sm" onClick={exit}><LogOut />Exit</Button></div>
       </div>
       <Suspense fallback={<div className="grid min-h-[60vh] place-items-center text-muted-foreground">Opening preview…</div>}>
-        {role === "doctor" && <GuestDoctorDashboard patients={patients} page={page} onPageChange={setPage} onPatientsChange={setPatients} />}
+        {role === "doctor" && <GuestDoctorDashboard patients={patients} page={page} onPageChange={setPage} onPatientsChange={setPatients} name={form.fullName} specialty={form.specialty} />}
         {role === "receptionist" && <ReceptionistView guestRows={schedule} onGuestRowsChange={(rows) => setPatients((current) => current.map((p) => { const row = rows.find((r) => r.id === p.id); return row ? { ...p, followUpIso: row.follow_up_date ?? "", followUpStatus: row.follow_up_status } : p; }))} />}
         {role === "patient" && record && <PatientHome guestRecord={{ name: form.fullName || record.name, follow_up_date: record.followUpIso, follow_up_status: record.followUpStatus, note: record.notes[0]?.text ?? "" }} />}
       </Suspense>

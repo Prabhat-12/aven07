@@ -59,8 +59,8 @@ export function AvennDashboard({ initialPage = "patients" }: { initialPage?: Wor
 }
 
 // Guest data never enters a live query or mutation. This adapter only shares presentation.
-export function GuestDoctorDashboard({ patients, page, onPageChange, onPatientsChange }: { patients: Patient[]; page: WorkspacePage; onPageChange: (page: WorkspacePage) => void; onPatientsChange: (patients: Patient[]) => void }) {
-  const doctor: Doctor = { name: "Dr. Isha Mehta", email: "guest@example.invalid", specialty: "Endocrinology" };
+export function GuestDoctorDashboard({ patients, page, onPageChange, onPatientsChange, name, specialty }: { patients: Patient[]; page: WorkspacePage; onPageChange: (page: WorkspacePage) => void; onPatientsChange: (patients: Patient[]) => void; name: string; specialty: string }) {
+  const doctor: Doctor = { name, email: "guest@example.invalid", specialty };
   return <DoctorCtx.Provider value={doctor}><PatientsCtx.Provider value={patients}><DashboardShell initialPage={page} guest={{ onPageChange, onPatientsChange }} /></PatientsCtx.Provider></DoctorCtx.Provider>;
 }
 
@@ -88,12 +88,17 @@ function DashboardShell({ initialPage, guest }: { initialPage: WorkspacePage; gu
   const [profileOpen, setProfileOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
 
-  const persistTasks: React.Dispatch<React.SetStateAction<Task[]>> = (updater) => setTasks((current) => {
-    const next = typeof updater === "function" ? updater(current) : updater;
-    if (!guest) void saveClinicalPatch(currentPatient, { tasks: next });
-    return next;
-  });
-  const persistMedications = (next: Medication[]) => { setMedications(next); if (!guest) void saveClinicalPatch(currentPatient, { medications: next }); };
+  const persistTasks: React.Dispatch<React.SetStateAction<Task[]>> = (updater) => {
+    const next = typeof updater === "function" ? updater(tasks) : updater;
+    setTasks(next);
+    if (guest) guest.onPatientsChange(patients.map((p) => p.id === currentPatient.id ? { ...p, tasks: next } : p));
+    else void saveClinicalPatch(currentPatient, { tasks: next });
+  };
+  const persistMedications = (next: Medication[]) => {
+    setMedications(next);
+    if (guest) guest.onPatientsChange(patients.map((p) => p.id === currentPatient.id ? { ...p, medications: next } : p));
+    else void saveClinicalPatch(currentPatient, { medications: next });
+  };
   const goTo = (to: "/dashboard" | "/patients" | "/follow-ups" | "/investigations" | "/messages") => {
     if (guest) guest.onPageChange(to.slice(1) as WorkspacePage);
     else navigate({ to });
@@ -133,7 +138,9 @@ function DashboardShell({ initialPage, guest }: { initialPage: WorkspacePage; gu
       const text = value.trim() || "New patient note";
       try {
         if (!guest) await addPatientNote(currentPatient.dbId, doctor.name, text);
-        setNotes((n) => [{ date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }), author: doctor.name, text }, ...n]);
+        const nextNote = { date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }), author: doctor.name, text };
+        setNotes((n) => [nextNote, ...n]);
+        if (guest) guest.onPatientsChange(patients.map((p) => p.id === currentPatient.id ? { ...p, notes: [nextNote, ...p.notes] } : p));
         setFeedback("Note saved and shared with the patient");
       } catch { setFeedback("Could not save the note."); }
     }
