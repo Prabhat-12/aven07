@@ -44,6 +44,79 @@ export type Database = {
         }
         Relationships: []
       }
+      care_tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          detail: string
+          due_date: string | null
+          id: string
+          patient_id: string
+          status: string
+          title: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          detail?: string
+          due_date?: string | null
+          id?: string
+          patient_id: string
+          status?: string
+          title: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          detail?: string
+          due_date?: string | null
+          id?: string
+          patient_id?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_tasks_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_checkins: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          patient_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string
+          patient_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          patient_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_checkins_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_clinical: {
         Row: {
           age: number
@@ -128,6 +201,9 @@ export type Database = {
       }
       patients: {
         Row: {
+          appointment_status: string
+          appointment_time: string | null
+          contact_phone: string | null
           created_at: string
           doctor_id: string | null
           follow_up_date: string | null
@@ -138,6 +214,9 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          appointment_status?: string
+          appointment_time?: string | null
+          contact_phone?: string | null
           created_at?: string
           doctor_id?: string | null
           follow_up_date?: string | null
@@ -148,6 +227,9 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          appointment_status?: string
+          appointment_time?: string | null
+          contact_phone?: string | null
           created_at?: string
           doctor_id?: string | null
           follow_up_date?: string | null
