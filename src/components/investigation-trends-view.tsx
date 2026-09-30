@@ -65,8 +65,8 @@ export function InvestigationTrendsView({ patient, onAdd, onOverview }: Props) {
     setCategory(record.category);
     setSelectedName(record.item.name);
   };
-  const summary = !selected || selected.item.status === "Pending" || !latest
-    ? `${selected?.item.name ?? "Investigation"} is awaiting a recorded result.`
+  const summary = !selected || !latest
+    ? selected?.item.status === "Pending" ? `${selected.item.name} is awaiting a recorded result.` : `No dated ${selected?.item.name ?? "investigation"} readings are available for this period.`
     : change === null ? `One ${selected.item.name} reading is available in this period; no change can be calculated.`
     : change === 0 ? `${selected.item.name} is unchanged from the previous recorded reading.`
     : `${selected.item.name} ${change > 0 ? "increased" : "decreased"} by ${formatReading(Math.abs(change), selected.item.unit)} from the previous recorded reading.`;
