@@ -1,6 +1,7 @@
 # Avenn UX completion
 
 ## Doctor dashboard presentation feedback
+- [x] Left-align task and investigation rows, with details beneath titles and status at the far edge
 - [x] Span the doctor guest banner across the page with Avenn below it
 - [x] Remove metric tile edge accents across doctor pages
 - [x] Replace tinted care-plan rows with subtle separators
