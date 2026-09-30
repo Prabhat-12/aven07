@@ -73,10 +73,15 @@
 }
 
 @utility panel {
-  border: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
-  border-radius: 1rem;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  border-radius: 0.625rem;
   background: var(--card);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--navy) 4%, transparent);
+}
+
+@utility flat-section {
+  border-top: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  padding-top: 1.25rem;
 }
 
 @utility glass-panel {

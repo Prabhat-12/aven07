@@ -1,12 +1,13 @@
 import type { Patient, Comparison, Metric, Point } from "@/lib/patient-types";
+import { guestCareTasks } from "@/lib/care-loop";
 
 // Public, fictional examples only. These identifiers intentionally cannot claim clinic records.
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"];
 const trend = (values: number[]): Point[] => values.map((value, index) => ({ month: months[index] ?? "Sep", value }));
 const examples = [
-  { name: "Maya Verma", id: "GUEST-MV-01", age: 48, gender: "Female", slot: "09:30", iso: "2026-10-03", status: "Due this week", hba1c: 7.4, egfr: 84, weight: 68, bp: "128/82", cholesterol: 194, medication: "Metformin", values: [8.9,8.6,8.3,8.1,7.9,7.7,7.5,7.3,7.4], note: "Review daily walking and meal timing at the next follow-up." },
-  { name: "Arjun Nair", id: "GUEST-AN-02", age: 55, gender: "Male", slot: "11:00", iso: "2026-10-15", status: "Upcoming", hba1c: 8.0, egfr: 76, weight: 82, bp: "134/86", cholesterol: 208, medication: "Glimepiride", values: [9.2,9.1,9.0,8.8,8.7,8.5,8.4,8.2,8.0], note: "Discuss glucose readings and reinforce the agreed activity plan." },
-  { name: "Leena Rao", id: "GUEST-LR-03", age: 61, gender: "Female", slot: "14:15", iso: "2026-09-12", status: "Lost to Follow-up", hba1c: 9.1, egfr: 58, weight: 74, bp: "142/90", cholesterol: 216, medication: "Metformin", values: [8.2,8.3,8.4,8.6,8.7,8.8,9.0,9.0,9.1], note: "Offer a convenient follow-up time and review kidney function." },
+  { appt: "Confirmed", name: "Maya Verma", id: "GUEST-MV-01", age: 48, gender: "Female", slot: "09:30", iso: "2026-10-03", status: "Due this week", hba1c: 7.4, egfr: 84, weight: 68, bp: "128/82", cholesterol: 194, medication: "Metformin", values: [8.9,8.6,8.3,8.1,7.9,7.7,7.5,7.3,7.4], note: "Review daily walking and meal timing at the next follow-up." },
+  { appt: "Waiting", name: "Arjun Nair", id: "GUEST-AN-02", age: 55, gender: "Male", slot: "11:00", iso: "2026-10-15", status: "Upcoming", hba1c: 8.0, egfr: 76, weight: 82, bp: "134/86", cholesterol: 208, medication: "Glimepiride", values: [9.2,9.1,9.0,8.8,8.7,8.5,8.4,8.2,8.0], note: "Discuss glucose readings and reinforce the agreed activity plan." },
+  { appt: "Scheduled", name: "Leena Rao", id: "GUEST-LR-03", age: 61, gender: "Female", slot: "14:15", iso: "2026-09-12", status: "Lost to Follow-up", hba1c: 9.1, egfr: 58, weight: 74, bp: "142/90", cholesterol: 216, medication: "Metformin", values: [8.2,8.3,8.4,8.6,8.7,8.8,9.0,9.0,9.1], note: "Offer a convenient follow-up time and review kidney function." },
 ];
 
 export const guestPatients: Patient[] = examples.map((e) => {
@@ -32,6 +33,7 @@ export const guestPatients: Patient[] = examples.map((e) => {
     activities: [{ date: "18 Sep 2026", title: "Lab result received", note: `HbA1c · ${e.hba1c}%` }],
     visits: [{ date: "18 Jun 2026", title: "Routine follow-up", summary: "Care plan and daily activity reviewed.", actions: ["Care plan reviewed", "Follow-up scheduled"] }],
     notes: [{ date: "18 Sep 2026", author: "Dr. Isha Mehta", text: e.note }], rawData: {},
+    careTasks: guestCareTasks(e.id), checkins: [], appointmentStatus: e.appt,
   };
 });
 
