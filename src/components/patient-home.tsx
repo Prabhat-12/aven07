@@ -8,6 +8,9 @@ import { formatIso, type Patient } from "@/lib/patient-types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/status-badge";
 
@@ -83,7 +86,7 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
     const done = st.tone === "done";
     return (
       <li className="flex items-start gap-3 py-3">
-        <button type="button" aria-label={done ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`} onClick={() => toggleTask.mutate(task)} className={cn("mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border", done ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50 hover:border-primary")}>{done && <Check className="size-3.5" />}</button>
+        <label className="-m-2.5 grid size-11 shrink-0 cursor-pointer place-items-center"><Checkbox checked={done} onCheckedChange={() => toggleTask.mutate(task)} aria-label={`${task.title}: done`} className="size-6" /></label>
         <div className="min-w-0 flex-1"><p className={cn("font-medium text-navy", done && "text-muted-foreground line-through")}>{task.title}</p><p className="text-xs text-muted-foreground">{task.detail}{task.dueIso && !done ? ` · Due ${formatIso(task.dueIso)}` : ""}</p></div>
         <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium", st.tone === "overdue" ? "bg-critical-surface text-critical" : st.tone === "due" ? "bg-warning-surface text-warning" : "bg-muted text-muted-foreground")}><Icon className="size-3" />{st.label}</span>
       </li>
@@ -132,7 +135,7 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
         </>}
 
         {view && tab === "My care" && <>
-          <div><h1 className="text-2xl font-bold text-navy">My care plan</h1><p className="mt-1 text-sm text-muted-foreground">Progress: <strong className="text-navy">{progress.done} / {progress.total} actions completed</strong></p><div className="mt-3 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={progress.done} aria-valuemax={progress.total} aria-label="Care plan progress"><div className="h-full bg-success" style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} /></div></div>
+          <div><h1 className="text-2xl font-bold text-navy">My care plan</h1><p className="mt-1 text-sm text-muted-foreground">Progress: <strong className="text-navy">{progress.done} / {progress.total} actions completed</strong></p><div className="mt-3 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuenow={progress.done} aria-valuemax={progress.total} aria-valuetext={`${progress.done} of ${progress.total} actions completed`} aria-label="Care plan progress"><div className="h-full bg-success" style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} /></div></div>
           <section><h2 className="text-lg font-semibold text-navy">Care actions</h2><ul className="mt-2 divide-y divide-border/60">{tasks.map((t) => <TaskRow key={t.id} task={t} />)}</ul></section>
           <section className="flat-section"><h2 className="text-lg font-semibold text-navy">Care timeline</h2>
             <ol className="mt-3 space-y-4 border-l border-border pl-5">
@@ -140,13 +143,13 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
               <li className="relative"><span className="absolute -left-[1.6rem] top-1 size-2.5 rounded-full border-2 border-primary bg-card" /><p className="text-xs font-semibold text-foreground">{nextAppt}</p><p className="text-sm font-medium text-navy">Next follow-up</p><p className="text-xs text-muted-foreground">{view.followStatus}</p></li>
             </ol>
           </section>
-          <section className="flat-section">
-            <h2 className="text-lg font-semibold text-navy">How are you doing with your plan?</h2>
-            <div role="radiogroup" aria-label="Plan check-in" className="mt-3 grid gap-2">{CHECKIN_OPTIONS.map((o) => <button key={o} type="button" role="radio" aria-checked={checkStatus === o} onClick={() => setCheckStatus(o)} className={cn("flex items-center gap-3 rounded-md border px-4 py-3 text-left text-sm", checkStatus === o ? "border-success bg-accent text-navy" : "border-border bg-card hover:border-primary/50")}><span className={cn("grid size-4 place-items-center rounded-full border", checkStatus === o ? "border-primary" : "border-muted-foreground/50")}>{checkStatus === o && <span className="size-2 rounded-full bg-success" />}</span>{o}</button>)}</div>
-            {needsText && <Textarea className="mt-3" aria-label="What is making it difficult?" placeholder="Tell your doctor what is making it difficult (optional)" value={checkText} onChange={(e) => setCheckText(e.target.value)} maxLength={400} />}
+          <fieldset className="flat-section">
+            <legend className="text-lg font-semibold text-navy">How are you doing with your plan?</legend>
+            <RadioGroup value={checkStatus} onValueChange={setCheckStatus} className="mt-3 grid gap-2">{CHECKIN_OPTIONS.map((o, i) => <label key={o} htmlFor={`checkin-${i}`} className={cn("flex min-h-11 cursor-pointer items-center gap-3 rounded-md border px-4 py-3 text-sm", checkStatus === o ? "border-primary bg-accent text-navy" : "border-border bg-card hover:border-primary")}><RadioGroupItem id={`checkin-${i}`} value={o} />{o}</label>)}</RadioGroup>
+            {needsText && <div className="mt-3 space-y-1.5"><Label htmlFor="checkin-text">What is making it difficult? (optional)</Label><Textarea id="checkin-text" value={checkText} onChange={(e) => setCheckText(e.target.value)} maxLength={400} /></div>}
             <Button className="mt-3" disabled={!checkStatus || checkIn.isPending} onClick={() => checkIn.mutate()}>{checkIn.isPending ? "Sending…" : "Send to my doctor"}</Button>
             {view.checkins[0] && <p className="mt-3 text-xs text-muted-foreground">Last update {view.checkins[0].date}: {view.checkins[0].status}{view.checkins[0].message ? ` — "${view.checkins[0].message}"` : ""}</p>}
-          </section>
+          </fieldset>
           <section className="flat-section"><h2 className="text-lg font-semibold text-navy">Guidance</h2><div className="divide-y divide-border/60">
             {info(<Apple className="size-5" />, "Diet", "Fill half your plate with vegetables, choose whole grains, and keep sweet drinks and refined sugar for rare occasions.")}
             {info(<Footprints className="size-5" />, "Lifestyle", "Keep regular meal and sleep times, check your feet daily, and take your medicines exactly as prescribed.")}
