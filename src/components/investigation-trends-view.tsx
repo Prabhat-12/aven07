@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Activity, ArrowRight, CalendarDays, ChevronRight, Clock3, FlaskConical, Info, Plus, TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,11 @@ export function InvestigationTrendsView({ patient, onAdd, onOverview }: Props) {
   const [category, setCategory] = useState<InvestigationCategory>(records[0]?.category ?? "HbA1c");
   const [selectedName, setSelectedName] = useState(records[0]?.item.name ?? "");
   const [range, setRange] = useState("6");
+  useEffect(() => {
+    setCategory(records[0]?.category ?? "HbA1c");
+    setSelectedName(records[0]?.item.name ?? "");
+    setRange("6");
+  }, [patient.id]);
   const selected = records.find((record) => record.item.name === selectedName);
   const categoryRecords = records.filter((record) => record.category === category);
   const shown = selected ? visibleReadings(selected.readings, Number(range)) : [];

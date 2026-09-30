@@ -18,7 +18,7 @@ export const guestPatients: Patient[] = examples.map((e) => {
     { label: "Blood Pressure", value: e.bp, note: "", date: "18 Sep 2026", icon: "HeartPulse", tone: "green" },
   ];
   const comparisons: Comparison[] = [
-    { name: "HbA1c", unit: "%", previous: e.hba1c + 0.3, latest: e.hba1c, previousDate: "18 Jun 2026", latestDate: "18 Sep 2026", low: 4, high: 7, max: 12, lowerIsBetter: true, status: "Results received", note: "Review the change since the previous consultation.", icon: "FlaskConical" },
+    { name: "HbA1c", unit: "%", previous: e.values[5] ?? null, latest: e.hba1c, previousDate: "18 Jun 2026", latestDate: "18 Sep 2026", low: 4, high: 7, max: 12, lowerIsBetter: true, status: "Results received", note: "Review the change since the previous consultation.", icon: "FlaskConical" },
     { name: "2-hr Post-prandial Glucose", unit: "mg/dL", previous: 204, latest: 188, previousDate: "18 Jun 2026", latestDate: "18 Sep 2026", low: 80, high: 140, max: 350, lowerIsBetter: true, status: "Results received", note: "Measured two hours after the main meal.", icon: "Activity" },
     { name: "eGFR", unit: "mL/min", previous: e.egfr - 2, latest: e.egfr, previousDate: "18 Jun 2026", latestDate: "18 Sep 2026", low: 60, high: 120, max: 120, lowerIsBetter: false, status: "Results received", note: "Kidney function estimate reviewed during follow-up.", icon: "FileText" },
     { name: "Serum Creatinine", unit: "mg/dL", previous: 1, latest: 1, previousDate: "18 Jun 2026", latestDate: "18 Sep 2026", low: 0, high: 0, max: 0, lowerIsBetter: false, status: "Results received", note: "Review alongside the kidney function estimate.", icon: "Activity" },
