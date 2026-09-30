@@ -1,5 +1,11 @@
 # Avenn UX completion
 
+## Doctor dashboard presentation feedback
+- [x] Keep the Avenn brand visible beside the doctor guest banner
+- [x] Remove metric tile edge accents across doctor pages
+- [x] Replace tinted care-plan rows with subtle separators
+- [x] Remove the Care loop section from patient overview
+
 ## Doctor investigation trends (approved)
 - [x] Replace comparison cards with selectable trend charts, dated results, and investigation list
 - [x] Add isolated fictional guest histories; keep signed-in readings factual and target-free

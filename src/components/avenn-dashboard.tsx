@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount, useSignOut } from "@/lib/account";
 import { addCareTask, addPatientNote, loadDoctorPatients, saveClinicalPatch, saveFollowUp } from "@/lib/doctor-data";
-import { latestDifficulty, progressOf, taskState } from "@/lib/care-loop";
+import { latestDifficulty, taskState } from "@/lib/care-loop";
 import { STATUS_LOST, followUpStatusFor, type Comparison, type Medication, type Metric, type Note, type Patient, type Point, type Task } from "@/lib/patient-types";
 import { StatusBadge } from "@/components/status-badge";
 import { InvestigationTrendsView } from "@/components/investigation-trends-view";
@@ -270,7 +270,6 @@ function Overview({ patient, onDetail, tasks, setTasks, onTab, onSelectPatient }
   const weight = patient.metrics.find((m) => m.label === "Weight");
   const pending = patient.comparisons.filter((c) => c.status === "Pending");
   const careTasks = patient.careTasks ?? [];
-  const progress = progressOf(careTasks);
   const difficulty = latestDifficulty(patient.checkins);
   const lastCheckin = patient.checkins?.[0];
   const overdue = careTasks.filter((t) => ["Overdue", "Due today"].includes(taskState(t).label));
@@ -280,7 +279,6 @@ function Overview({ patient, onDetail, tasks, setTasks, onTab, onSelectPatient }
     ...(difficulty ? [{ key: "checkin", icon: MessageSquare, title: "Patient reported difficulty", note: difficulty.message || difficulty.status, tab: "Notes" as Tab }] : []),
     ...(patient.followUpStatus !== "Upcoming" ? [{ key: "follow", icon: CalendarDays, title: `Follow-up: ${patient.followUpStatus}`, note: patient.followUp, tab: "Care Plan" as Tab }] : []),
   ];
-  const loop = [["Planned", String(progress.total)], ["Completed", String(progress.done)], ["Pending", String(progress.total - progress.done)], ["Next", patient.followUp]];
   const lastVisit = patient.visits[0];
   const since = [
     { label: "HbA1c", value: hba1c && hba1c.previous !== null && hba1c.latest !== null ? `${hba1c.previous} → ${hba1c.latest}%` : patient.metrics[0]?.value ?? "—", note: hbChange ? (hbChange.flat ? "No change" : hbChange.diff < 0 ? "Down" : "Up") : "" },
@@ -292,7 +290,6 @@ function Overview({ patient, onDetail, tasks, setTasks, onTab, onSelectPatient }
     <div className="space-y-6">
       <section aria-labelledby="since-heading"><h2 id="since-heading" className="section-title mb-3">Since last visit</h2><dl className="grid grid-cols-2 divide-border/70 rounded-lg border border-border/70 bg-card sm:grid-cols-4 sm:divide-x">{since.map((item) => <div key={item.label} className="border-b border-border/70 p-4 last:border-b-0 sm:border-b-0"><dt className="text-xs text-muted-foreground">{item.label}</dt><dd className="mt-1 font-semibold text-navy">{item.value}</dd><p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{item.note}</p></div>)}</dl></section>
       <section aria-labelledby="attention-heading"><h2 id="attention-heading" className="section-title mb-2">Needs attention</h2>{attention.length === 0 ? <div className="rounded-lg bg-accent p-4"><p className="font-medium text-navy">You're all caught up</p><p className="text-sm text-muted-foreground">No follow-ups or results need your attention right now.</p></div> : <ul className="divide-y divide-border/60 rounded-lg border border-border/70 bg-card">{attention.map((a) => <li key={a.key}><Button variant="ghost" className="h-auto w-full justify-start gap-3 rounded-none px-4 py-3 text-left" onClick={() => onTab(a.tab)}><a.icon className="text-foreground"/><span className="min-w-0 flex-1"><span className="block font-medium">{a.title}</span><span className="block truncate text-xs font-normal text-muted-foreground">{a.note}</span></span><ChevronRight className="text-muted-foreground"/></Button></li>)}</ul>}</section>
-      <section aria-labelledby="loop-heading"><h2 id="loop-heading" className="section-title mb-2">Care loop</h2><ol className="grid grid-cols-2 gap-2 sm:grid-cols-4">{loop.map(([label, value], index) => <li key={label} className="flex items-center gap-2 border-t-2 border-primary/30 pt-2"><span className="text-xs font-semibold text-foreground">{index + 1}</span><span><span className="block text-xs text-muted-foreground">{label}</span><span className="block font-semibold text-navy">{value}</span></span></li>)}</ol></section>
       <section className="flat-section"><div className="mb-2 flex items-center justify-between"><h2 className="section-title">Recent investigations</h2><Button variant="link" className="h-auto p-0" onClick={() => onTab("Investigations")}>View all <ArrowRight/></Button></div><div>{patient.comparisons.slice(0, 4).map((item) => <ComparisonRow key={item.name} item={item} onClick={() => onTab("Investigations")}/>)}</div></section>
       {lastVisit && <section className="flat-section"><div className="mb-2 flex items-center justify-between"><h2 className="section-title">Previous visit</h2><Button variant="link" className="h-auto p-0" onClick={() => onTab("Previous Visits")}>View full visit <ArrowRight/></Button></div><p className="text-xs font-semibold text-foreground">{lastVisit.date} · {lastVisit.title}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{lastVisit.summary}</p></section>}
       <section className="flat-section"><Button variant="outline" size="sm" aria-expanded={showDetail} onClick={() => setShowDetail((v) => !v)}>{showDetail ? "Hide full detail" : "Show full detail"}</Button>
