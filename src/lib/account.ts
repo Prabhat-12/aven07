@@ -9,9 +9,10 @@ export type Profile = {
 };
 export type Account = { userId: string; email: string; role: Role | null; profile: Profile | null };
 
-export function useAccount() {
+export function useAccount(enabled = true) {
   return useQuery({
     queryKey: ["account"],
+    enabled,
     queryFn: async (): Promise<Account | null> => {
       const { data: userData } = await supabase.auth.getUser();
       const user = userData.user;

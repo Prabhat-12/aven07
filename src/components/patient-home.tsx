@@ -18,7 +18,7 @@ function exercise(bmi: number) {
 }
 
 export function PatientHome({ guestRecord }: { guestRecord?: { name: string; follow_up_date: string; follow_up_status: string; note: string } } = {}) {
-  const account = useAccount();
+  const account = useAccount(!guestRecord);
   const signOut = useSignOut();
   const [emergency, setEmergency] = useState(false);
   const [sent, setSent] = useState(false);

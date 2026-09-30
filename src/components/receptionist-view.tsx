@@ -14,7 +14,7 @@ const filters = ["All", "Due this week", "Upcoming", STATUS_LOST];
 
 // Receptionists only ever request name and follow-up schedule columns.
 export function ReceptionistView({ guestRows, onGuestRowsChange }: { guestRows?: Row[]; onGuestRowsChange?: (rows: Row[]) => void } = {}) {
-  const account = useAccount();
+  const account = useAccount(!guestRows);
   const signOut = useSignOut();
   const queryClient = useQueryClient();
   const approved = guestRows ? true : (account.data?.profile?.approved ?? false);
