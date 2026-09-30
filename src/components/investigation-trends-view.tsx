@@ -49,7 +49,7 @@ export function InvestigationTrendsView({ patient, onAdd, onOverview }: Props) {
     setCategory(record.category);
     setSelectedName(record.item.name);
   };
-  const summary = selected?.item.status === "Pending" || !latest
+  const summary = !selected || selected.item.status === "Pending" || !latest
     ? `${selected?.item.name ?? "Investigation"} is awaiting a recorded result.`
     : change === null ? `One ${selected.item.name} reading is available in this period; no change can be calculated.`
     : change === 0 ? `${selected.item.name} is unchanged from the previous recorded reading.`
@@ -60,7 +60,7 @@ export function InvestigationTrendsView({ patient, onAdd, onOverview }: Props) {
     {records.length === 0 ? <div className="rounded-lg border border-border bg-card p-10 text-center"><p className="font-semibold">No investigations yet</p><p className="mt-1 text-sm text-muted-foreground">Assigned investigations and results will appear here.</p></div> : <>
       <div className="mb-3 flex flex-col gap-3 rounded-lg border border-border bg-card p-2 sm:flex-row sm:items-center sm:justify-between"><div className="flex min-w-0 gap-1 overflow-x-auto" role="group" aria-label="Investigation categories">{investigationCategories.map((name) => <Button key={name} size="sm" variant={category === name ? "secondary" : "ghost"} aria-pressed={category === name} className={cn("shrink-0", category === name && "bg-accent text-foreground hover:bg-accent")} onClick={() => selectCategory(name)}>{name}</Button>)}</div><Select value={range} onValueChange={setRange}><SelectTrigger className="w-full shrink-0 sm:w-36" aria-label="Trend time range"><CalendarDays className="size-4" /><SelectValue /></SelectTrigger><SelectContent><SelectItem value="6">Last 6 months</SelectItem><SelectItem value="12">Last 1 year</SelectItem></SelectContent></Select></div>
       {categoryRecords.length === 0 && <p className="mb-3 rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">No investigations recorded in {category}.</p>}
-      {selected && <><div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(290px,1fr)]">
+      {selected && categoryRecords.length > 0 && <><div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(290px,1fr)]">
         <section className="min-w-0 rounded-lg border border-border bg-card p-4 sm:p-5" aria-label={`${selected.item.name} results`}>
           <LatestDetails record={selected} readings={shown} />
           {shown.length >= 2 ? <div role="img" aria-label={`${selected.item.name} trend from ${shown[0]?.label} to ${latest?.label}`} className="mt-5 h-64 w-full sm:h-72"><ResponsiveContainer width="100%" height="100%"><AreaChart data={chartData} margin={{ top: 14, right: 12, bottom: 0, left: -22 }}><CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} minTickGap={18} /><YAxis domain={["auto", "auto"]} axisLine={false} tickLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} width={44} /><Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 6 }} formatter={(value) => [formatReading(Number(value), selected.item.unit), selected.item.name]} /><Area type="monotone" dataKey="value" stroke="var(--success)" strokeWidth={2.5} fill="var(--quiet-lime)" dot={{ r: 3, fill: "var(--success)" }} activeDot={{ r: 5 }} isAnimationActive={false} /></AreaChart></ResponsiveContainer></div>
