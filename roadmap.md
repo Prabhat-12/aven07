@@ -25,3 +25,8 @@
 - [x] D. In-app messaging note with office hours; patient Emergency (off-hours) button + warning signs
 - [x] F. Sign-up, onboarding, role-based views (doctor / receptionist / patient), data in Lovable Cloud with row-level rules
 - [ ] Verify each role with real sign-ins (blocked: email confirmation needs a real inbox)
+
+# Judge guest journey (approved)
+- [ ] Add safe, isolated guest onboarding and three switchable role previews
+- [ ] Refine sign-in and real onboarding presentation and mismatch recovery
+- [ ] Verify guest flows, role isolation and mobile layout
