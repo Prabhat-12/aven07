@@ -138,11 +138,6 @@
   background: var(--card);
   box-shadow: none;
 }
-@utility metric-blue { border-left: 2px solid var(--information); }
-@utility metric-amber { border-left: 2px solid var(--warning); }
-@utility metric-critical { border-left: 2px solid var(--critical); }
-@utility metric-cyan { border-left: 2px solid var(--border); }
-@utility metric-green { border-left: 2px solid var(--success); }
 @utility metric-icon {
   display: grid;
   width: 2.4rem;
@@ -158,10 +153,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-radius: 0.5rem;
-  background: var(--secondary);
-  padding: 0.9rem;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  padding: 0.9rem 0;
   font-size: 0.875rem;
+  &:last-child { border-bottom: 0; }
   & p { margin-top: 0.2rem; font-size: 0.75rem; color: var(--muted-foreground); }
   & svg { width: 1rem; height: 1rem; color: var(--muted-foreground); }
 }
