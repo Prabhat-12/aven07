@@ -1,7 +1,7 @@
 # Avenn UX completion
 
 ## Doctor dashboard presentation feedback
-- [x] Keep the Avenn brand visible beside the doctor guest banner
+- [x] Span the doctor guest banner across the page with Avenn below it
 - [x] Remove metric tile edge accents across doctor pages
 - [x] Replace tinted care-plan rows with subtle separators
 - [x] Remove the Care loop section from patient overview
