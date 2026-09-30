@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { StatusBadge } from "@/components/status-badge";
+import { Label } from "@/components/ui/label";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export type ScheduleRow = { id: string; name: string; follow_up_date: string | null; follow_up_status: string; appointment_status: string; appointment_time: string | null; contact_phone: string | null };
 type Row = ScheduleRow;
@@ -26,6 +28,7 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Row | null>(null);
   const [contact, setContact] = useState<Row | null>(null);
+  const [noShow, setNoShow] = useState<Row | null>(null);
   const [record, setRecord] = useState<Row | null>(null);
   const [date, setDate] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -69,7 +72,7 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
           <DropdownMenuItem onSelect={() => setStatus(r, "Arrived")}>Mark arrived</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setStatus(r, "Waiting")}>Mark waiting</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setStatus(r, "Completed")}>Mark completed</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setStatus(r, "No-show")}>Mark no-show</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setNoShow(r)}>Mark no-show…</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setContact(r)}>Contact patient</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setFeedback(`Message sent to the clinic team about ${r.name}. No details were shared.`)}>Contact clinic team</DropdownMenuItem>
         </DropdownMenuContent>
@@ -77,7 +80,7 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
     </div>
   );
 
-  const Status = ({ s }: { s: string }) => <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-medium text-navy"><Check className="size-3" />{s}</span>;
+  const Status = ({ s }: { s: string }) => <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-medium text-navy">{s === "Confirmed" || s === "Completed" || s === "Arrived" ? <Check className="size-3" aria-hidden="true" /> : <Clock className="size-3" aria-hidden="true" />}{s}</span>;
 
   return (
     <div className="min-h-screen bg-background">
@@ -139,10 +142,16 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
         )}
       </main>
 
+      <AlertDialog open={!!noShow} onOpenChange={(o) => !o && setNoShow(null)}>
+        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Mark {noShow?.name} as no-show?</AlertDialogTitle><AlertDialogDescription>This records that the patient did not attend today's appointment. You can reschedule them afterwards.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => { if (noShow) setStatus(noShow, "No-show"); setNoShow(null); }}>Mark no-show</AlertDialogAction></AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent className="sm:max-w-md"><DialogHeader><DialogTitle>Reschedule follow-up</DialogTitle><DialogDescription>{editing?.name}</DialogDescription></DialogHeader>
-          <Input type="date" aria-label="New follow-up date" value={date} onChange={(e) => setDate(e.target.value)} />
-          <Button disabled={!date || update.isPending} onClick={reschedule}>Save date</Button>
+          <div className="space-y-1.5"><Label htmlFor="reschedule-date">New follow-up date</Label><Input id="reschedule-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+          <Button disabled={!date || update.isPending} onClick={reschedule}>{update.isPending ? "Saving…" : "Save date"}</Button>
         </DialogContent>
       </Dialog>
 
