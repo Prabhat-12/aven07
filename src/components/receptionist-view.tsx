@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { StatusBadge } from "@/components/status-badge";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export type ScheduleRow = { id: string; name: string; follow_up_date: string | null; follow_up_status: string; appointment_status: string; appointment_time: string | null; contact_phone: string | null };
@@ -106,12 +107,12 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
             <section className="mt-7" aria-labelledby="today-heading">
               <h2 id="today-heading" className="text-lg font-semibold text-navy">Today's appointments</h2>
               <div className="mt-2 divide-y divide-border/60 border-y border-border/60">
-                {loading && <div className="space-y-2 py-4" aria-busy="true"><div className="h-8 animate-pulse rounded bg-muted" /><div className="h-8 animate-pulse rounded bg-muted" /></div>}
+                 {loading && <div className="space-y-2 py-4" aria-busy="true" role="status"><span className="sr-only">Loading appointments…</span><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></div>}
                 {!loading && today.length === 0 && <p className="py-5 text-sm text-muted-foreground">No appointments are scheduled for today.</p>}
                 {today.map((r) => (
                   <div key={r.id} className="flex flex-wrap items-center gap-3 py-3">
                     <span className="w-14 text-sm font-semibold text-foreground">{r.appointment_time}</span>
-                    <button type="button" className="min-w-32 flex-1 text-left font-medium text-navy hover:underline" onClick={() => setRecord(r)}>{r.name}</button>
+                    <Button type="button" variant="link" className="h-auto min-w-32 flex-1 justify-start p-0 text-left font-medium text-navy" onClick={() => setRecord(r)}>{r.name}</Button>
                     <Status s={r.appointment_status} />
                     <Actions r={r} />
                   </div>
@@ -130,7 +131,7 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
                 {visible.map((r) => (
                   <div key={r.id} className="flex flex-wrap items-center gap-3 py-3">
                     <span className="grid size-9 place-items-center rounded-full bg-secondary text-sm font-semibold text-foreground">{r.name.split(" ").map((p) => p[0]).join("").slice(0, 2)}</span>
-                    <button type="button" className="min-w-32 flex-1 text-left font-medium text-navy hover:underline" onClick={() => setRecord(r)}>{r.name}</button>
+                    <Button type="button" variant="link" className="h-auto min-w-32 flex-1 justify-start p-0 text-left font-medium text-navy" onClick={() => setRecord(r)}>{r.name}</Button>
                     <span className="flex items-center gap-2 text-sm text-muted-foreground"><CalendarDays className="size-4" />{formatIso(r.follow_up_date)}</span>
                     <StatusBadge status={r.follow_up_status} />
                     <Button size="sm" variant="outline" onClick={() => { setEditing(r); setDate(r.follow_up_date ?? ""); }}>Reschedule</Button>

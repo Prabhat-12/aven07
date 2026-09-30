@@ -61,3 +61,4 @@
 - [ ] 3. Shared components (tabs, dialogs, fields, status chip, toasts, skeletons, empty states)
 - [ ] 4. Screen passes: Doctor, Patient, Receptionist, Entry/guest
 - [ ] 5. Final compliance check
+- [ ] Answer patient dashboard layout question without changing the agreed Home / My care / Appointments / Notes structure unless requested
