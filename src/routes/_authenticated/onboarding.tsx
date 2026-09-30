@@ -89,7 +89,7 @@ function Onboarding() {
                 <div className="grid gap-4 sm:grid-cols-3">{field("Date of birth", "dob", { type: "date" })}{field("Height (cm)", "height", { type: "number", min: 50, max: 250 })}{field("Weight (kg)", "weight", { type: "number", min: 10, max: 400 })}</div>
                 <p className="flex items-center gap-2 rounded-lg bg-accent p-3 text-sm text-navy"><HeartPulse className="size-4 shrink-0 text-primary" />We match your UHID and phone number to your clinic record so nobody else can claim it.</p>
               </>}
-              {error && <div role="alert" className="rounded-md border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive"><p>{error}</p>{role === "patient" && <Button type="button" variant="outline" className="mt-3" onClick={() => navigate({ to: "/guest" })}>Explore as guest <ArrowRight /></Button>}</div>}
+              {error && <div role="alert" className="rounded-md border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive"><p>{error}</p>{role === "patient" && <Button type="button" variant="outline" className="mt-3" onClick={async () => { await signOut(); navigate({ to: "/guest" }); }}>Explore as guest <ArrowRight /></Button>}</div>}
               <div className="flex justify-between gap-2 pt-2"><Button type="button" variant="ghost" onClick={() => { setRole(null); setError(""); }}>Back</Button><Button type="submit" disabled={busy}>{busy ? "Saving…" : "Finish setup"}</Button></div>
             </form>
           )}

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, ClipboardList, LogOut, Stethoscope, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { guestDefaults, guestPatients } from "@/lib/guest-data";
 import type { Patient } from "@/lib/patient-types";
 import type { Role } from "@/lib/account";
 import type { WorkspacePage } from "@/components/avenn-dashboard";
+import { supabase } from "@/integrations/supabase/client";
 
 const GuestDoctorDashboard = lazy(() => import("@/components/avenn-dashboard").then((m) => ({ default: m.GuestDoctorDashboard })));
 const ReceptionistView = lazy(() => import("@/components/receptionist-view").then((m) => ({ default: m.ReceptionistView })));
@@ -32,6 +33,16 @@ const roles = [
 
 function Guest() {
   const navigate = useNavigate();
+  const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!active) return;
+      if (data.user) navigate({ to: "/dashboard", replace: true });
+      else setChecked(true);
+    });
+    return () => { active = false; };
+  }, [navigate]);
   const [role, setRole] = useState<Role | null>(null);
   const [entered, setEntered] = useState(false);
   const [form, setForm] = useState(guestDefaults.patient);
@@ -39,6 +50,8 @@ function Guest() {
   const [page, setPage] = useState<WorkspacePage>("dashboard");
   const choose = (next: Role) => { setRole(next); setForm(guestDefaults[next]); setEntered(false); setPage("dashboard"); };
   const exit = () => { setPatients(structuredClone(guestPatients)); navigate({ to: "/auth" }); };
+
+  if (!checked) return <div className="grid min-h-screen place-items-center bg-background text-sm text-muted-foreground">Opening Avenn…</div>;
 
   if (entered && role) {
     const record = patients[0];
