@@ -250,7 +250,7 @@ function TopHeader({ search, setSearch, matches, onSelect, onMenu, onNotificatio
 }
 
 function PatientHeader({ patient, medications, onFollow, onConsult }: { patient: Patient; medications: Medication[]; onFollow: () => void; onConsult: () => void }) {
-  return <section className="glass-panel mt-4 flex flex-col gap-5 overflow-hidden rounded-2xl p-5 sm:p-6 xl:flex-row xl:items-center">
+  return <section className="panel mt-4 flex flex-col gap-5 overflow-hidden p-5 sm:p-6 xl:flex-row xl:items-center">
     <div className="flex min-w-0 flex-1 items-center gap-4"><div className="relative shrink-0">{patient.image ? <img src={patient.image} alt={patient.name} width={816} height={816} className="size-20 rounded-full object-cover ring-4 ring-card sm:size-24"/> : <div className="grid size-20 place-items-center rounded-full bg-accent text-2xl font-semibold text-primary ring-4 ring-card sm:size-24">{initials(patient.name)}</div>}<span className="absolute bottom-0 right-0 grid size-7 place-items-center rounded-full border-2 border-card bg-card text-primary"><Camera className="size-3.5"/></span></div>
       <div className="min-w-0"><h1 className="truncate text-2xl font-bold text-navy sm:text-3xl">{patient.name}</h1><p className="mt-1 text-sm text-muted-foreground sm:text-base">{patient.age} yrs <span className="mx-2">·</span> {patient.gender} <span className="mx-2">·</span> {patient.condition}</p><div className="mt-3 flex flex-wrap gap-2">{patient.tags.map((tag) => <span key={tag} className="tag">{tag}</span>)}<RxChip meds={medications}/><StatusBadge status={patient.followUpStatus}/></div></div>
     </div>
