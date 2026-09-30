@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/status-badge";
 
@@ -99,18 +101,21 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
 
   const nextAppt = view?.followIso ? formatIso(view.followIso) : "Not scheduled";
 
+  const selectTab = (value: string) => { setTab(value as Tab); setFeedback(""); };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between border-b border-border/60 bg-card px-4 py-3 sm:px-8">
         <span className="text-2xl font-bold text-navy">Avenn</span>
         {!guest && <Button variant="outline" size="sm" onClick={signOut}><LogOut />Sign out</Button>}
       </header>
-      <nav aria-label="Patient sections" className="border-b border-border/60 bg-card px-4 sm:px-8"><div className="mx-auto flex max-w-3xl gap-1 overflow-x-auto">{tabs.map((t) => <button key={t} type="button" aria-current={tab === t ? "page" : undefined} onClick={() => { setTab(t); setFeedback(""); }} className={cn("shrink-0 border-b-2 px-3 py-3 text-sm font-medium", tab === t ? "border-success text-foreground" : "border-transparent text-muted-foreground hover:text-navy")}>{t}</button>)}</div></nav>
+      <Tabs value={tab} onValueChange={selectTab}>
+      <div className="border-b border-border/60 bg-card px-4 sm:px-8"><div className="mx-auto max-w-3xl overflow-x-auto"><TabsList aria-label="Patient sections" className="flex h-auto w-max gap-1 rounded-none bg-transparent p-0">{tabs.map((t) => <TabsTrigger key={t} value={t} className="shrink-0 rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:border-success data-[state=active]:bg-transparent data-[state=active]:text-foreground">{t}</TabsTrigger>)}</TabsList></div></div>
       <main className="mx-auto max-w-3xl space-y-7 px-4 py-8 sm:px-8">
-        {!view && !guest && (record.isLoading ? <div className="space-y-3" aria-busy="true"><div className="h-8 w-48 animate-pulse rounded bg-muted" /><div className="h-24 animate-pulse rounded bg-muted" /><div className="h-40 animate-pulse rounded bg-muted" /></div> : <p className="panel p-5 text-sm text-muted-foreground">We couldn't find your care record yet. Nothing has been changed. Please check again shortly.</p>)}
+        {!view && !guest && (record.isLoading ? <div className="space-y-3" aria-busy="true" role="status"><span className="sr-only">Loading your care record…</span><Skeleton className="h-8 w-48" /><Skeleton className="h-24 w-full" /><Skeleton className="h-40 w-full" /></div> : <p className="panel p-5 text-sm text-muted-foreground">We couldn't find your care record yet. Nothing has been changed. Please check again shortly.</p>)}
         {feedback && <p role="status" className="rounded-md border border-primary/20 bg-accent px-4 py-3 text-sm text-navy">{feedback}</p>}
 
-        {view && tab === "Home" && <>
+        <TabsContent value="Home" className="space-y-7" tabIndex={0}>{view && <>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div><h1 className="text-2xl font-bold text-navy">Hello, {view.name.split(" ")[0]}</h1><p className="mt-1 text-sm text-muted-foreground">Your care plan and next steps</p></div>
             <Button className="bg-critical text-destructive-foreground hover:bg-critical/90" onClick={() => { setEmergency(true); setSent(false); }}><PhoneCall />Emergency (off-hours)</Button>
@@ -132,9 +137,9 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
             <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-foreground">{warningSigns.map((w) => <li key={w}>{w}</li>)}</ul>
             <p className="mt-3 text-sm font-semibold text-critical">Please consult your doctor immediately.</p>
           </section>
-        </>}
+        </>}</TabsContent>
 
-        {view && tab === "My care" && <>
+        <TabsContent value="My care" className="space-y-7" tabIndex={0}>{view && <>
           <div><h1 className="text-2xl font-bold text-navy">My care plan</h1><p className="mt-1 text-sm text-muted-foreground">Progress: <strong className="text-navy">{progress.done} / {progress.total} actions completed</strong></p><div className="mt-3 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuenow={progress.done} aria-valuemax={progress.total} aria-valuetext={`${progress.done} of ${progress.total} actions completed`} aria-label="Care plan progress"><div className="h-full bg-success" style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} /></div></div>
           <section><h2 className="text-lg font-semibold text-navy">Care actions</h2><ul className="mt-2 divide-y divide-border/60">{tasks.map((t) => <TaskRow key={t.id} task={t} />)}</ul></section>
           <section className="flat-section"><h2 className="text-lg font-semibold text-navy">Care timeline</h2>
@@ -156,9 +161,9 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
             {info(<Dumbbell className="size-5" />, plan ? `Exercise · ${plan.title}` : "Exercise", plan ? `${plan.body} (BMI ${bmi?.toFixed(1)})` : "Add your height and weight to get an exercise plan.")}
             {info(<BookOpen className="size-5" />, "General awareness", "Diabetes is manageable. Regular checkups of blood sugar, kidneys, eyes and feet prevent most complications.")}
           </div></section>
-        </>}
+        </>}</TabsContent>
 
-        {view && tab === "Appointments" && <>
+        <TabsContent value="Appointments" className="space-y-7" tabIndex={0}>{view && <>
           <h1 className="text-2xl font-bold text-navy">Appointments</h1>
           <section><h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Upcoming</h2>
             <div className="panel mt-2 flex flex-wrap items-center gap-4 p-5"><CalendarDays className="size-6 text-foreground" /><div className="flex-1"><strong className="text-lg text-navy">{nextAppt}</strong><p className="text-sm text-muted-foreground">{guest ? "Dr. Isha Mehta · " : ""}Follow-up</p><p className="mt-1 text-xs text-muted-foreground">Status: {view.apptStatus}</p></div><StatusBadge status={view.followStatus} /></div>
@@ -167,13 +172,14 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
           <section className="flat-section"><h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Previous</h2>
             <div className="mt-2 flex items-center gap-4 py-2"><Check className="size-5 text-foreground" /><div><strong className="text-navy">18 Sep 2026</strong><p className="text-sm text-muted-foreground">Consultation completed</p></div></div>
           </section>
-        </>}
+        </>}</TabsContent>
 
-        {view && tab === "Notes" && <>
+        <TabsContent value="Notes" className="space-y-7" tabIndex={0}>{view && <>
           <div><h1 className="text-2xl font-bold text-navy">Notes from your doctor</h1><p className="mt-1 text-sm text-muted-foreground">Only notes your doctor chose to share with you appear here.</p></div>
           <div className="divide-y divide-border/60">{view.notes.length === 0 && <p className="py-3 text-sm text-muted-foreground">No notes yet.</p>}{view.notes.map((n) => <article key={n.id} className="py-4"><p className="text-xs font-semibold text-foreground">{n.date} · {n.author}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{n.text}</p></article>)}</div>
-        </>}
+        </>}</TabsContent>
       </main>
+      </Tabs>
       <Dialog open={emergency} onOpenChange={setEmergency}>
         <DialogContent className="sm:max-w-md"><DialogHeader><DialogTitle>Emergency (off-hours)</DialogTitle><DialogDescription>For urgent problems outside clinic hours. For life-threatening symptoms, call your local emergency number first.</DialogDescription></DialogHeader>
           {sent ? <p role="status" className="rounded-lg bg-accent p-3 text-sm text-navy">Request noted. In this prototype no real call is placed yet.</p> : <Button className="bg-critical text-destructive-foreground hover:bg-critical/90" onClick={() => setSent(true)}>Contact my doctor now</Button>}

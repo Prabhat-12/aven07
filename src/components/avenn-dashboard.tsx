@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -51,7 +53,7 @@ export function AvennDashboard({ initialPage = "patients" }: { initialPage?: Wor
   const account = useAccount().data;
   const signOut = useSignOut();
   const center = "grid min-h-screen place-items-center bg-background px-4 text-center text-sm text-muted-foreground";
-  if (query.isLoading) return <div className={center}>Loading patients…</div>;
+  if (query.isLoading) return <div className="mx-auto max-w-5xl space-y-5 px-5 py-8" aria-busy="true" role="status"><span className="sr-only">Loading patients…</span><Skeleton className="h-12 w-60"/><Skeleton className="h-32 w-full"/><Skeleton className="h-56 w-full"/></div>;
   if (query.error) return <div className={center}>We could not load patient records. Please refresh.</div>;
   const list = query.data ?? [];
   if (!list.length) return <div className={center}><div><p>No patients are assigned to you yet.</p><Button className="mt-4" variant="outline" onClick={signOut}>Sign out</Button></div></div>;
@@ -160,14 +162,14 @@ function DashboardShell({ initialPage, guest }: { initialPage: WorkspacePage; gu
         <div className="mx-auto w-full max-w-[1600px] px-3 pb-24 sm:px-5 lg:px-7 lg:pb-8">
           {initialPage === "patients" ? <>
             <PatientHeader patient={currentPatient} medications={medications} onFollow={() => setFollowOpen(true)} onConsult={() => { setConsultStep(1); setConsultOpen(true); }} />
-            <PatientTabs value={tab} onChange={setTab} />
-            <div className="pt-4">
-              {tab === "Overview" && <Overview patient={currentPatient} onDetail={setDetail} tasks={tasks} setTasks={persistTasks} onTab={setTab} onSelectPatient={selectPatient} />}
-              {tab === "Investigations" && <InvestigationTrendsView patient={currentPatient} onAdd={() => setSimpleModal("investigation")} onOverview={() => setTab("Overview")} />}
-              {tab === "Care Plan" && <CarePlan patient={currentPatient} medications={medications} tasks={tasks} setTasks={persistTasks} onAdd={setSimpleModal} onFollow={() => setFollowOpen(true)} />}
-              {tab === "Previous Visits" && <VisitsPage patient={currentPatient} onDetail={setDetail} />}
-              {tab === "Notes" && <NotesPage patient={currentPatient} notes={notes} onAdd={() => setSimpleModal("note")} />}
-            </div>
+             <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+               <PatientTabs />
+               <TabsContent value="Overview" className="pt-4"><Overview patient={currentPatient} onDetail={setDetail} tasks={tasks} setTasks={persistTasks} onTab={setTab} onSelectPatient={selectPatient} /></TabsContent>
+               <TabsContent value="Investigations" className="pt-4"><InvestigationTrendsView patient={currentPatient} onAdd={() => setSimpleModal("investigation")} onOverview={() => setTab("Overview")} /></TabsContent>
+               <TabsContent value="Care Plan" className="pt-4"><CarePlan patient={currentPatient} medications={medications} tasks={tasks} setTasks={persistTasks} onAdd={setSimpleModal} onFollow={() => setFollowOpen(true)} /></TabsContent>
+               <TabsContent value="Previous Visits" className="pt-4"><VisitsPage patient={currentPatient} onDetail={setDetail} /></TabsContent>
+               <TabsContent value="Notes" className="pt-4"><NotesPage patient={currentPatient} notes={notes} onAdd={() => setSimpleModal("note")} /></TabsContent>
+             </Tabs>
           </> : null}
           {initialPage === "dashboard" && <PracticeDashboard onNavigate={goTo} onSelectPatient={selectPatient} />}
           {initialPage === "follow-ups" && <FollowUpsPage onAssign={() => setFollowOpen(true)} onOpenPatient={selectPatient} />}
@@ -198,7 +200,7 @@ function DoctorAvatar({ className }: { className?: string }) {
 
 function RxChip({ meds }: { meds: Medication[] }) {
   const [open, setOpen] = useState(false);
-  return <Popover open={open} onOpenChange={setOpen}><PopoverTrigger asChild><button type="button" className="tag cursor-pointer gap-1" aria-label="View prescription" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}><Pill className="size-3"/>Rx</button></PopoverTrigger><PopoverContent className="w-64 p-3" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground">Current prescription</p><ul className="space-y-2">{meds.length ? meds.map((m) => <li key={m.name} className="text-sm"><strong className="text-navy">{m.name}</strong><span className="block text-xs text-muted-foreground">{m.dosage} · {m.frequency}</span></li>) : <li className="text-sm text-muted-foreground">No active medication.</li>}</ul></PopoverContent></Popover>;
+  return <Popover open={open} onOpenChange={setOpen}><PopoverTrigger asChild><Button type="button" variant="ghost" size="sm" className="tag h-auto gap-1" aria-label="Rx · View prescription" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}><Pill className="size-3"/>Rx</Button></PopoverTrigger><PopoverContent className="w-64 p-3" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground">Current prescription</p><ul className="space-y-2">{meds.length ? meds.map((m) => <li key={m.name} className="text-sm"><strong className="text-navy">{m.name}</strong><span className="block text-xs text-muted-foreground">{m.dosage} · {m.frequency}</span></li>) : <li className="text-sm text-muted-foreground">No active medication.</li>}</ul></PopoverContent></Popover>;
 }
 
 function SmallTrend({ title, unit, data }: { title: string; unit: string; data: Point[] }) {
@@ -258,8 +260,8 @@ function PatientHeader({ patient, medications, onFollow, onConsult }: { patient:
   </section>;
 }
 
-function PatientTabs({ value, onChange }: { value: Tab; onChange: (tab: Tab) => void }) {
-  return <div className="-mx-3 overflow-x-auto px-3 sm:-mx-5 sm:px-5 lg:-mx-0 lg:px-0"><nav className="flex min-w-max items-center gap-1 border-b border-border/60" aria-label="Patient sections">{(Object.keys(tabIcons) as Tab[]).map((label) => { const Icon = tabIcons[label]; return <Button key={label} variant="ghost" onClick={() => onChange(label)} className={cn("relative h-14 rounded-none px-4 text-muted-foreground hover:bg-transparent", value === label && "text-navy after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-primary")}><Icon className="size-4"/>{label}</Button>; })}</nav></div>;
+function PatientTabs() {
+  return <div className="-mx-3 overflow-x-auto px-3 sm:-mx-5 sm:px-5 lg:-mx-0 lg:px-0"><TabsList aria-label="Patient sections" className="flex h-auto min-w-max justify-start gap-1 rounded-none border-b border-border/60 bg-transparent p-0">{(Object.keys(tabIcons) as Tab[]).map((label) => { const Icon = tabIcons[label]; return <TabsTrigger key={label} value={label} className="relative h-14 gap-2 rounded-none px-4 text-muted-foreground shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-navy"><Icon className="size-4" aria-hidden="true"/>{label}</TabsTrigger>; })}</TabsList></div>;
 }
 
 function Overview({ patient, onDetail, tasks, setTasks, onTab, onSelectPatient }: { patient: Patient; onDetail: (d: Detail) => void; tasks: Task[]; setTasks: React.Dispatch<React.SetStateAction<Task[]>>; onTab: (tab: Tab) => void; onSelectPatient: (p: Patient) => void }) {
@@ -347,7 +349,7 @@ function CarePlan({ patient, medications, tasks, setTasks, onAdd, onFollow }: { 
 }
 function CareSection({ icon, title, action, onAction, children }: { icon: ReactNode; title: string; action: string; onAction: () => void; children: ReactNode }) { return <section className="panel p-5"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><h3 className="section-title">{icon}{title}</h3><Button variant="outline" size="sm" onClick={onAction}><Plus/>{action}</Button></div><div>{children}</div></section>; }
 function VisitsPage({ patient, onDetail }: { patient: Patient; onDetail: (d: Detail) => void }) { return <><PageIntro title="Previous Visits" description="Consultation history, kept within the patient context."/><div className="space-y-4">{patient.visits.map((v) => <article key={v.date} className="panel p-5 sm:p-6"><div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div><time className="text-xs font-semibold text-foreground">{v.date}</time><h3 className="mt-1 text-lg font-semibold text-navy">{v.title}</h3><p className="mt-3 text-sm text-muted-foreground">{v.summary}</p><ul className="mt-3 flex flex-wrap gap-2">{v.actions.map((a) => <li key={a} className="tag">{a}</li>)}</ul></div><Button variant="outline" className="shrink-0" onClick={() => onDetail({ kind: "visit", title: v.title, subtitle: `${patient.name} · ${v.date}` })}>View consultation <ArrowRight/></Button></div></article>)}</div></>; }
-function NotesPage({ patient, notes, onAdd }: { patient: Patient; notes: Note[]; onAdd: () => void }) { return <><PageIntro title="Notes" description={`Private doctor notes for ${patient.name}. The patient can read them too.`} action={<Button onClick={onAdd}><Plus/>Add note</Button>}/><section className="panel divide-y divide-border/60">{notes.map((n) => <article key={`${n.date}-${n.text}`} className="p-5 sm:p-6"><div className="flex justify-between"><div><time className="text-xs font-semibold text-foreground">{n.date}</time><p className="mt-1 text-sm font-medium">{n.author}</p></div><Button size="icon" variant="ghost" aria-label="Edit note"><MoreHorizontal/></Button></div><p className="mt-4 text-sm leading-6 text-muted-foreground">{n.text}</p></article>)}</section></>; }
+function NotesPage({ patient, notes, onAdd }: { patient: Patient; notes: Note[]; onAdd: () => void }) { return <><PageIntro title="Notes" description={`Private doctor notes for ${patient.name}. The patient can read them too.`} action={<Button onClick={onAdd}><Plus/>Add note</Button>}/><section className="panel divide-y divide-border/60">{notes.map((n) => <article key={`${n.date}-${n.text}`} className="p-5 sm:p-6"><div><time className="text-xs font-semibold text-foreground">{n.date}</time><p className="mt-1 text-sm font-medium">{n.author}</p></div><p className="mt-4 text-sm leading-6 text-muted-foreground">{n.text}</p></article>)}</section></>; }
 
 function PracticeDashboard({ onNavigate, onSelectPatient }: { onNavigate: (to: "/patients" | "/follow-ups" | "/messages") => void; onSelectPatient: (p: Patient) => void }) {
   const patients = usePatients();
@@ -371,7 +373,7 @@ function PracticeDashboard({ onNavigate, onSelectPatient }: { onNavigate: (to: "
         {items.length === 0 ? <div className="rounded-lg bg-accent p-5"><p className="font-medium text-navy">You're all caught up</p><p className="text-sm text-muted-foreground">No follow-ups or results need your attention right now.</p></div> : <div className="space-y-1">{items.map((it) => <AttentionRow key={it.key} icon={it.icon} title={it.title} note={it.note} onClick={it.go}/>)}</div>}
       </section>
     </div>
-    <p className="mt-8 border-t border-border/70 pt-4 text-sm text-muted-foreground"><button type="button" className="hover:text-navy hover:underline" onClick={() => onNavigate("/follow-ups")}>12 follow-ups this week</button> · <button type="button" className="hover:text-navy hover:underline" onClick={() => onNavigate("/patients")}>48 patients in care</button> · <button type="button" className="hover:text-navy hover:underline" onClick={() => onNavigate("/messages")}>3 unread messages</button></p>
+    <p className="mt-8 flex flex-wrap items-center gap-x-2 border-t border-border/70 pt-4 text-sm text-muted-foreground"><Button type="button" variant="link" className="h-auto p-0" onClick={() => onNavigate("/follow-ups")}>12 follow-ups this week</Button> · <Button type="button" variant="link" className="h-auto p-0" onClick={() => onNavigate("/patients")}>48 patients in care</Button> · <Button type="button" variant="link" className="h-auto p-0" onClick={() => onNavigate("/messages")}>3 unread messages</Button></p>
   </div>;
 }
 

@@ -41,7 +41,7 @@
 - [x] C. Rx hover popup, three broad tasks, "Next follow-up on" inside tasks, private notes shared with patient
 - [x] D. In-app messaging note with office hours; patient Emergency (off-hours) button + warning signs
 - [x] F. Sign-up, onboarding, role-based views (doctor / receptionist / patient), data in Lovable Cloud with row-level rules
-- [ ] Verify each role with real sign-ins (blocked: email confirmation needs a real inbox)
+- [ ] Verify each role with real sign-ins (blocked: available signed-in account is still at role onboarding; separate doctor, patient and receptionist accounts needed)
 
 # Judge guest journey (approved)
 - [x] Add safe, isolated guest onboarding and three switchable role previews
@@ -53,11 +53,12 @@
 - [x] Patient: Home / My care / Appointments / Notes with check-in
 - [x] Receptionist: today's appointments, operational actions, operational-only record
 - [x] Guest preview verified on desktop for all roles
-- [ ] Real-role sign-in checks (blocked: email confirmation needs a real inbox)
+- [ ] Real-role sign-in checks (blocked: available signed-in account is still at role onboarding; separate role accounts needed)
 
 ## UI Rules audit rollout
 - [x] 1. Brand tokens applied and verified; system fonts; chart palette
-- [x] 2. Accessibility MUSTs: patient check-in, tasks, progress, reception no-show confirm, labels, focus offset (doctor dashboard buttons still open)
-- [ ] 3. Shared components (tabs, dialogs, fields, status chip, toasts, skeletons, empty states)
-- [ ] 4. Screen passes: Doctor, Patient, Receptionist, Entry/guest
-- [ ] 5. Final compliance check
+- [x] 2. Accessibility pass: patient check-in, tasks, progress, reception no-show confirmation, labels, focus offset, doctor patient tabs and controls
+- [x] 3. Shared tabs, dialogs, toast host, and skeleton loading states
+- [x] 4. Guest screen passes: Doctor, Patient, Receptionist, Entry/guest; signed-in roles remain unverified because the available account has not completed onboarding
+- [x] 5. Final UI Rules check: token delivery verified; declared rules self-reported, token usage not automatically checked
+- [x] Answer patient dashboard layout question without changing the agreed Home / My care / Appointments / Notes structure unless requested
