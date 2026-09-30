@@ -60,7 +60,7 @@ function AuthPage() {
     <EntryLayout>
         <section>
           <p className="mb-3 text-xs font-bold uppercase text-foreground">Your care workspace</p>
-          <h1 className="entry-heading text-3xl font-semibold text-navy">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>
+          <h1 className="text-3xl font-semibold text-navy">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>
           <p className="mt-3 text-sm text-muted-foreground">{mode === "signin" ? "Sign in to continue to your workspace." : "You will choose your role in the next step."}</p>
           <form onSubmit={submit} className="mt-6 space-y-4">
             <label className="block space-y-2"><span className="text-sm font-medium">Email</span><Input className="h-11 rounded-md bg-card" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" /></label>

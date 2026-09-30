@@ -54,3 +54,10 @@
 - [x] Receptionist: today's appointments, operational actions, operational-only record
 - [x] Guest preview verified on desktop for all roles
 - [ ] Real-role sign-in checks (blocked: email confirmation needs a real inbox)
+
+## UI Rules audit rollout
+- [x] 1. Brand tokens applied and verified; system fonts; chart palette
+- [ ] 2. Accessibility MUSTs (names, keyboard, focus, contrast)
+- [ ] 3. Shared components (tabs, dialogs, fields, status chip, toasts, skeletons, empty states)
+- [ ] 4. Screen passes: Doctor, Patient, Receptionist, Entry/guest
+- [ ] 5. Final compliance check
