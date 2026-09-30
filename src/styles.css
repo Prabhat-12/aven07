@@ -140,6 +140,7 @@
 }
 @utility metric-blue { border-left: 2px solid var(--information); }
 @utility metric-amber { border-left: 2px solid var(--warning); }
+@utility metric-critical { border-left: 2px solid var(--critical); }
 @utility metric-cyan { border-left: 2px solid var(--border); }
 @utility metric-green { border-left: 2px solid var(--success); }
 @utility metric-icon {

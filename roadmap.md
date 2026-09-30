@@ -1,5 +1,10 @@
 # Avenn UX completion
 
+## Avenn-wide brand refresh (approved)
+- [x] Map lime/neutral and separate clinical-state tokens into shared styling
+- [x] Refine doctor, patient, receptionist, entry and guest visual treatments
+- [ ] Check desktop/mobile guest views and interaction states; confirm preview health
+
 - [x] Audit existing navigation and controls
 - [x] Add a practice dashboard
 - [x] Add the follow-ups queue and assignment flow
