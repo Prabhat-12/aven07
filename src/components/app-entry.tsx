@@ -1,9 +1,9 @@
 import { lazy, Suspense, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAccount } from "@/lib/account";
-import type { WorkspacePage } from "@/components/avenn-dashboard";
+import type { WorkspacePage } from "@/components/aven-dashboard";
 
-const AvennDashboard = lazy(() => import("@/components/avenn-dashboard").then((m) => ({ default: m.AvennDashboard })));
+const AvenDashboard = lazy(() => import("@/components/aven-dashboard").then((m) => ({ default: m.AvenDashboard })));
 const ReceptionistView = lazy(() => import("@/components/receptionist-view").then((m) => ({ default: m.ReceptionistView })));
 const PatientHome = lazy(() => import("@/components/patient-home").then((m) => ({ default: m.PatientHome })));
 
@@ -24,7 +24,7 @@ export function AppEntry({ page }: { page: WorkspacePage }) {
 
   return (
     <Suspense fallback={<Splash />}>
-      {data.role === "doctor" && <AvennDashboard initialPage={page} />}
+      {data.role === "doctor" && <AvenDashboard initialPage={page} />}
       {data.role === "receptionist" && <ReceptionistView />}
       {data.role === "patient" && <PatientHome />}
     </Suspense>

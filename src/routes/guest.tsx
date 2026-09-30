@@ -7,19 +7,19 @@ import { EntryLayout } from "@/components/entry-layout";
 import { guestDefaults, guestPatients } from "@/lib/guest-data";
 import type { Patient } from "@/lib/patient-types";
 import type { Role } from "@/lib/account";
-import type { WorkspacePage } from "@/components/avenn-dashboard";
+import type { WorkspacePage } from "@/components/aven-dashboard";
 import { supabase } from "@/integrations/supabase/client";
 
-const GuestDoctorDashboard = lazy(() => import("@/components/avenn-dashboard").then((m) => ({ default: m.GuestDoctorDashboard })));
+const GuestDoctorDashboard = lazy(() => import("@/components/aven-dashboard").then((m) => ({ default: m.GuestDoctorDashboard })));
 const ReceptionistView = lazy(() => import("@/components/receptionist-view").then((m) => ({ default: m.ReceptionistView })));
 const PatientHome = lazy(() => import("@/components/patient-home").then((m) => ({ default: m.PatientHome })));
 
 export const Route = createFileRoute("/guest")({
   head: () => ({ meta: [
-    { title: "Guest preview | Avenn" },
-    { name: "description", content: "Explore fictional doctor, receptionist and patient workflows in Avenn without an account." },
-    { property: "og:title", content: "Guest preview | Avenn" },
-    { property: "og:description", content: "Explore fictional care workflows in an isolated Avenn guest preview." },
+    { title: "Guest preview | Aven" },
+    { name: "description", content: "Explore fictional doctor, receptionist and patient workflows in Aven without an account." },
+    { property: "og:title", content: "Guest preview | Aven" },
+    { property: "og:description", content: "Explore fictional care workflows in an isolated Aven guest preview." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ] }),
   component: Guest,
@@ -51,7 +51,7 @@ function Guest() {
   const choose = (next: Role) => { setRole(next); setForm(guestDefaults[next]); setEntered(false); setPage("dashboard"); };
   const exit = () => { setPatients(structuredClone(guestPatients)); navigate({ to: "/auth" }); };
 
-  if (!checked) return <div className="grid min-h-screen place-items-center bg-background text-sm text-muted-foreground">Opening Avenn…</div>;
+  if (!checked) return <div className="grid min-h-screen place-items-center bg-background text-sm text-muted-foreground">Opening Aven…</div>;
 
   if (entered && role) {
     const record = patients[0];

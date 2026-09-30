@@ -1,8 +1,8 @@
-# Avenn UX completion
+# Aven UX completion
 
 ## Doctor dashboard presentation feedback
 - [x] Left-align task and investigation rows, with details beneath titles and status at the far edge
-- [x] Span the doctor guest banner across the page with Avenn below it
+- [x] Span the doctor guest banner across the page with Aven below it
 - [x] Remove metric tile edge accents across doctor pages
 - [x] Replace tinted care-plan rows with subtle separators
 - [x] Remove the Care loop section from patient overview
@@ -12,7 +12,7 @@
 - [x] Add isolated fictional guest histories; keep signed-in readings factual and target-free
 - [x] Verify category, range, pending, assignment and overview journeys on desktop and mobile (guest preview)
 
-## Avenn-wide brand refresh (approved)
+## Aven-wide brand refresh (approved)
 - [x] Map lime/neutral and separate clinical-state tokens into shared styling
 - [x] Refine doctor, patient, receptionist, entry and guest visual treatments
 - [x] Check desktop/mobile guest views and interaction states; confirm preview health

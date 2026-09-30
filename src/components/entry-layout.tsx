@@ -5,7 +5,7 @@ export function EntryLayout({ children, step, guest = false }: { children: React
   return <div className="min-h-screen bg-background text-foreground">
     <div className="mx-auto grid min-h-screen max-w-[1440px] lg:grid-cols-[40%_60%]">
       <aside className="relative flex flex-col overflow-hidden border-b border-border bg-secondary px-6 py-7 sm:px-10 lg:min-h-screen lg:border-b-0 lg:border-r lg:px-14 lg:py-12">
-        <div className="flex items-center gap-2 text-2xl font-bold text-navy"><span className="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground"><HeartPulse className="size-5" /></span>Avenn</div>
+        <div className="flex items-center gap-2 text-2xl font-bold text-navy"><span className="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground"><HeartPulse className="size-5" /></span>Aven</div>
         <div className="my-auto py-8 lg:py-12">
           <p className="text-xs font-bold uppercase text-foreground">Care, between visits</p>
           <h2 className="mt-4 max-w-md text-3xl font-semibold leading-tight text-navy sm:text-4xl lg:text-5xl">A clearer picture of every next step.</h2>

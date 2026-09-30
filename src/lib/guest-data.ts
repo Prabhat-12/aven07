@@ -28,7 +28,7 @@ export const guestPatients: Patient[] = examples.map((e) => {
   return {
     dbId: e.id, id: e.id, name: e.name, phone: "Not available in guest preview", age: e.age, gender: e.gender, condition: "Type 2 Diabetes", tags: ["T2D", "Sample record"], slot: e.slot,
     followUp: new Date(`${e.iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }), followUpIso: e.iso, followUpStatus: e.status,
-    summary: `${e.name} is a fictional example patient in the Avenn guest preview. Review trends and plan the next follow-up.`, metrics, trend: trend(e.values), creatTrend: trend([0.9,0.9,1,0.9,1,1,1,1,1]),
+    summary: `${e.name} is a fictional example patient in the Aven guest preview. Review trends and plan the next follow-up.`, metrics, trend: trend(e.values), creatTrend: trend([0.9,0.9,1,0.9,1,1,1,1,1]),
     investigationTrends: {
       "2-hr Post-prandial Glucose": trend([224,218,216,210,207,204,198,192,188]),
       eGFR: trend([e.egfr - 6,e.egfr - 5,e.egfr - 4,e.egfr - 3,e.egfr - 3,e.egfr - 2,e.egfr - 1,e.egfr - 1,e.egfr]),
@@ -44,7 +44,7 @@ export const guestPatients: Patient[] = examples.map((e) => {
 });
 
 export const guestDefaults = {
-  doctor: { fullName: "Dr. Isha Mehta", specialty: "Endocrinology", clinic: "Avenn Sample Clinic", doctorEmail: "", uhid: "", phone: "", dob: "", height: "", weight: "" },
-  receptionist: { fullName: "Samira Das", specialty: "", clinic: "Avenn Sample Clinic", doctorEmail: "isha@example.invalid", uhid: "", phone: "", dob: "", height: "", weight: "" },
+  doctor: { fullName: "Dr. Isha Mehta", specialty: "Endocrinology", clinic: "Aven Sample Clinic", doctorEmail: "", uhid: "", phone: "", dob: "", height: "", weight: "" },
+  receptionist: { fullName: "Samira Das", specialty: "", clinic: "Aven Sample Clinic", doctorEmail: "isha@example.invalid", uhid: "", phone: "", dob: "", height: "", weight: "" },
   patient: { fullName: "Maya Verma", specialty: "", clinic: "", doctorEmail: "", uhid: "GUEST-MV-01", phone: "00000 00000", dob: "1978-04-16", height: "162", weight: "68" },
 };
