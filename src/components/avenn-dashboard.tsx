@@ -154,9 +154,9 @@ function DashboardShell({ initialPage, guest }: { initialPage: WorkspacePage; gu
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} active={initialPage} {...(guest ? { onNavigate: goTo } : {})} />
+       <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} active={initialPage} {...(guest ? { onNavigate: goTo } : {})} />
       <main className="min-h-screen lg:pl-48">
-        <TopHeader search={search} setSearch={setSearch} matches={matches} onSelect={selectPatient} onMenu={() => setMobileNav(true)} onNotifications={() => setNotificationsOpen(true)} onProfile={() => guest ? setFeedback("Guest doctor · fictional sample records") : setProfileOpen(true)} />
+         <TopHeader guest={Boolean(guest)} search={search} setSearch={setSearch} matches={matches} onSelect={selectPatient} onMenu={() => setMobileNav(true)} onNotifications={() => setNotificationsOpen(true)} onProfile={() => guest ? setFeedback("Guest doctor · fictional sample records") : setProfileOpen(true)} />
         <div className="mx-auto w-full max-w-[1600px] px-3 pb-24 sm:px-5 lg:px-7 lg:pb-8">
           {initialPage === "patients" ? <>
             <PatientHeader patient={currentPatient} medications={medications} onFollow={() => setFollowOpen(true)} onConsult={() => { setConsultStep(1); setConsultOpen(true); }} />
@@ -223,7 +223,7 @@ function Sidebar({ open, onClose, active, onNavigate }: { open: boolean; onClose
   ] as const;
   return <>
     {open && <div className="fixed inset-0 z-[70] bg-overlay lg:hidden" onClick={onClose} aria-hidden />}
-    <aside className={cn("fixed inset-y-0 left-0 z-[80] flex w-48 flex-col border-r border-border/50 bg-sidebar px-4 py-6 transition-transform lg:z-50 lg:translate-x-0", open ? "translate-x-0" : "-translate-x-full")}>
+    <aside className={cn("fixed inset-y-0 left-0 z-[80] flex w-48 flex-col border-r border-border/50 bg-sidebar px-4 py-6 transition-transform lg:z-50 lg:translate-x-0", onNavigate && "lg:top-13", open ? "translate-x-0" : "-translate-x-full")}>
       <div className="mb-8 flex items-center justify-between px-2"><span className="text-2xl font-bold tracking-normal text-navy">Avenn</span><Button size="icon" variant="ghost" className="lg:hidden" onClick={onClose} aria-label="Close navigation"><X /></Button></div>
       <nav className="space-y-2" aria-label="Main navigation">{nav.map(([label, Icon, to]) => onNavigate ? <Button key={label} variant="ghost" onClick={() => { onNavigate(to); onClose(); }} className={cn("w-full justify-start gap-3 px-3 text-muted-foreground", active === label.toLowerCase() && "bg-accent text-foreground hover:bg-accent")}><Icon />{label}</Button> : <Button key={label} asChild variant="ghost" className={cn("w-full justify-start gap-3 px-3 text-muted-foreground", active === label.toLowerCase() && "bg-accent text-foreground hover:bg-accent")}><Link to={to} onClick={onClose}><Icon />{label}</Link></Button>)}</nav>
       <div className="mt-auto border-t border-border/60 pt-5"><div className="flex items-center gap-3 px-2"><DoctorAvatar className="size-9"/><div><p className="text-xs font-semibold">{doctor.name}</p><p className="text-xs text-muted-foreground">{doctor.specialty}</p></div></div><p className="px-2 pt-5 text-xs leading-relaxed text-muted-foreground">Keeping care connected between visits.</p></div>
@@ -231,8 +231,8 @@ function Sidebar({ open, onClose, active, onNavigate }: { open: boolean; onClose
   </>;
 }
 
-function TopHeader({ search, setSearch, matches, onSelect, onMenu, onNotifications, onProfile }: { search: string; setSearch: (v: string) => void; matches: Patient[]; onSelect: (p: Patient) => void; onMenu: () => void; onNotifications: () => void; onProfile: () => void }) {
-  return <header className="sticky top-0 z-30 border-b border-border/40 bg-card px-3 py-3 sm:px-5 lg:px-7">
+function TopHeader({ guest, search, setSearch, matches, onSelect, onMenu, onNotifications, onProfile }: { guest: boolean; search: string; setSearch: (v: string) => void; matches: Patient[]; onSelect: (p: Patient) => void; onMenu: () => void; onNotifications: () => void; onProfile: () => void }) {
+  return <header className={cn("z-30 border-b border-border/40 bg-card px-3 py-3 sm:px-5 lg:px-7", guest ? "relative lg:sticky lg:top-13" : "sticky top-0")}>
     <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-4">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <Button size="icon" variant="ghost" className="lg:hidden" onClick={onMenu} aria-label="Open navigation"><Menu /></Button>

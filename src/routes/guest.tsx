@@ -57,7 +57,7 @@ function Guest() {
     const record = patients[0];
     const schedule = patients.map((p) => ({ id: p.id, name: p.name, follow_up_date: p.followUpIso, follow_up_status: p.followUpStatus, appointment_status: p.appointmentStatus ?? "Scheduled", appointment_time: p.slot, contact_phone: "Not available in guest preview" }));
     return <div className="min-h-screen bg-background">
-      <div className={`sticky top-0 z-[60] flex flex-wrap items-center justify-between gap-2 border-b border-primary/20 bg-quiet-lime px-4 py-2 text-sm sm:px-8 ${role === "doctor" ? "lg:ml-48" : ""}`}>
+      <div className="sticky top-0 z-[60] flex flex-wrap items-center justify-between gap-2 border-b border-primary/20 bg-quiet-lime px-4 py-2 text-sm sm:px-8 lg:min-h-13">
         <div><strong className="text-navy">Guest preview · {roles.find((r) => r.id === role)?.title}</strong><span className="ml-2 hidden text-muted-foreground sm:inline">Fictional examples; changes reset when you leave.</span></div>
         <div className="flex items-center gap-2"><Button variant="outline" size="sm" onClick={() => setEntered(false)}><ArrowLeft />Details</Button><Button variant="outline" size="sm" onClick={() => { setEntered(false); setRole(null); }}><UserRound />Switch role</Button><Button variant="ghost" size="sm" onClick={exit}><LogOut />Exit</Button></div>
       </div>
