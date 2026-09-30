@@ -12,3 +12,4 @@
 - Guest previews use isolated, browser-only fictional fixtures on public routes; never reuse authenticated patient queries or writes, because judges must not access or alter clinic data.
 - Real user roles remain server-assigned once and are never switchable in the signed-in workspace, because clinical data access is role-specific.
 - Keep Avenn's visual roles in semantic tokens in `src/styles.css` (lime brand, neutral surfaces, separate clinical states) rather than component-local colors, so doctor, patient, reception and entry screens stay consistent.
+- Keep investigation chart series adapted from recorded patient values, while guest-only sample histories remain in fictional fixtures; this prevents invented clinical readings reaching signed-in records.

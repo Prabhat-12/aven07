@@ -21,12 +21,18 @@ export const guestPatients: Patient[] = examples.map((e) => {
     { name: "HbA1c", unit: "%", previous: e.hba1c + 0.3, latest: e.hba1c, previousDate: "18 Jun 2026", latestDate: "18 Sep 2026", low: 4, high: 7, max: 12, lowerIsBetter: true, status: "Results received", note: "Review the change since the previous consultation.", icon: "FlaskConical" },
     { name: "2-hr Post-prandial Glucose", unit: "mg/dL", previous: 204, latest: 188, previousDate: "18 Jun 2026", latestDate: "18 Sep 2026", low: 80, high: 140, max: 350, lowerIsBetter: true, status: "Results received", note: "Measured two hours after the main meal.", icon: "Activity" },
     { name: "eGFR", unit: "mL/min", previous: e.egfr - 2, latest: e.egfr, previousDate: "18 Jun 2026", latestDate: "18 Sep 2026", low: 60, high: 120, max: 120, lowerIsBetter: false, status: "Results received", note: "Kidney function estimate reviewed during follow-up.", icon: "FileText" },
+    { name: "Serum Creatinine", unit: "mg/dL", previous: 1, latest: 1, previousDate: "18 Jun 2026", latestDate: "18 Sep 2026", low: 0, high: 0, max: 0, lowerIsBetter: false, status: "Results received", note: "Review alongside the kidney function estimate.", icon: "Activity" },
+    { name: "Total Cholesterol", unit: "mg/dL", previous: 201, latest: e.cholesterol, previousDate: "18 Jun 2026", latestDate: "18 Sep 2026", low: 0, high: 0, max: 0, lowerIsBetter: true, status: "Results received", note: "Review with the complete lipid profile.", icon: "Droplet" },
     { name: "Ophthalmology Consult", unit: "", previous: null, latest: null, previousLabel: "Last year", latestLabel: "Awaiting visit", previousDate: "2025", latestDate: "Assigned Sep 2026", low: 0, high: 0, max: 0, lowerIsBetter: true, status: "Pending", note: "Annual eye examination is due.", icon: "Stethoscope" },
   ];
   return {
     dbId: e.id, id: e.id, name: e.name, phone: "Not available in guest preview", age: e.age, gender: e.gender, condition: "Type 2 Diabetes", tags: ["T2D", "Sample record"], slot: e.slot,
     followUp: new Date(`${e.iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }), followUpIso: e.iso, followUpStatus: e.status,
     summary: `${e.name} is a fictional example patient in the Avenn guest preview. Review trends and plan the next follow-up.`, metrics, trend: trend(e.values), creatTrend: trend([0.9,0.9,1,0.9,1,1,1,1,1]),
+    investigationTrends: {
+      "2-hr Post-prandial Glucose": trend([224,218,216,210,207,204,198,192,188]),
+      eGFR: trend([e.egfr - 6,e.egfr - 5,e.egfr - 4,e.egfr - 3,e.egfr - 3,e.egfr - 2,e.egfr - 1,e.egfr - 1,e.egfr]),
+    },
     cholesterol: { value: e.cholesterol, date: "18 Sep 2026", trend: trend([225,220,217,212,207,201,e.cholesterol,e.cholesterol,e.cholesterol]) }, comparisons,
     tasks: [{ title: "Regular Follow-up", note: "", done: false, kind: "follow-up" }, { title: "Lifestyle Modification", note: "Daily walking plan", done: false }],
     medications: [{ name: e.medication, dosage: "500 mg", frequency: "BD", status: "Active" }],

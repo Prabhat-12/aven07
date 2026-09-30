@@ -1,5 +1,10 @@
 # Avenn UX completion
 
+## Doctor investigation trends (approved)
+- [ ] Replace comparison cards with selectable trend charts, dated results, and investigation list
+- [ ] Add isolated fictional guest histories; keep signed-in readings factual and target-free
+- [ ] Verify category, range, pending, assignment and overview journeys on desktop and mobile
+
 ## Avenn-wide brand refresh (approved)
 - [x] Map lime/neutral and separate clinical-state tokens into shared styling
 - [x] Refine doctor, patient, receptionist, entry and guest visual treatments
