@@ -13,10 +13,10 @@ import { EntryLayout } from "@/components/entry-layout";
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
     meta: [
-      { title: "Set up your account | Avenn" },
-      { name: "description", content: "Choose your role and finish setting up your Avenn account." },
-      { property: "og:title", content: "Set up your account | Avenn" },
-      { property: "og:description", content: "Choose your role and finish setting up your Avenn account." },
+      { title: "Set up your account | Aven" },
+      { name: "description", content: "Choose your role and finish setting up your Aven account." },
+      { property: "og:title", content: "Set up your account | Aven" },
+      { property: "og:description", content: "Choose your role and finish setting up your Aven account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -68,7 +68,7 @@ function Onboarding() {
     <EntryLayout step={role ? 2 : 1}>
         <section>
           <div className="mb-6 flex justify-end"><Button variant="ghost" size="sm" onClick={signOut}>Sign out</Button></div>
-          <h1 className="text-3xl font-semibold text-navy">{role ? `Your ${role} details` : "How will you use Avenn?"}</h1>
+          <h1 className="text-3xl font-semibold text-navy">{role ? `Your ${role} details` : "How will you use Aven?"}</h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">Your role decides what you can see. It is saved to your account and cannot be changed from the app.</p>
           {!role ? (
             <div className="mt-8 grid gap-3">

@@ -10,10 +10,10 @@ import { EntryLayout } from "@/components/entry-layout";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in | Avenn" },
-      { name: "description", content: "Sign in or create your Avenn account as a doctor, receptionist or patient." },
-      { property: "og:title", content: "Sign in | Avenn" },
-      { property: "og:description", content: "Secure access to the Avenn diabetes follow-up workspace." },
+      { title: "Sign in | Aven" },
+      { name: "description", content: "Sign in or create your Aven account as a doctor, receptionist or patient." },
+      { property: "og:title", content: "Sign in | Aven" },
+      { property: "og:description", content: "Secure access to the Aven diabetes follow-up workspace." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -71,7 +71,7 @@ function AuthPage() {
           </form>
           <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" /></div>
           <Button type="button" variant="outline" className="h-11 w-full" onClick={google}>Continue with Google</Button>
-          <p className="mt-5 text-center text-sm text-muted-foreground">{mode === "signin" ? "New to Avenn?" : "Already have an account?"}{" "}
+          <p className="mt-5 text-center text-sm text-muted-foreground">{mode === "signin" ? "New to Aven?" : "Already have an account?"}{" "}
             <Button type="button" variant="link" className="h-auto p-0" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(""); setMessage(""); }}>{mode === "signin" ? "Create an account" : "Sign in"}</Button></p>
         </section>
         <div className="mt-8 border-t border-border pt-6"><p className="text-sm font-semibold text-navy">Just looking around?</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Explore fictional examples as a doctor, receptionist or patient. No account needed.</p><Button asChild variant="outline" className="mt-4 h-11 w-full justify-between bg-card"><Link to="/guest">Explore as guest <ArrowRight /></Link></Button></div>

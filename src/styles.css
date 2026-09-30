@@ -179,7 +179,7 @@
   --spacing: var(--spacing);
 }
 
-/* Avenn clinical extensions: the brand defines no clinical-state tokens. */
+/* Aven clinical extensions: the brand defines no clinical-state tokens. */
 :root {
   --navy: var(--foreground);
   --overlay: oklch(0.213 0.009 137.8 / 45%);

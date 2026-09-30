@@ -86,7 +86,7 @@ export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { 
   return (
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between border-b border-border/60 bg-card px-4 py-3 sm:px-8">
-        <span className="text-2xl font-bold text-navy">Avenn</span>
+        <span className="text-2xl font-bold text-navy">Aven</span>
         <div className="flex items-center gap-3"><span className="hidden text-sm text-muted-foreground sm:block">{guestRows ? guestName : account.data?.profile?.full_name} · Receptionist</span>{!guestRows && <Button variant="outline" size="sm" onClick={signOut}><LogOut />Sign out</Button>}</div>
       </header>
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-8">
