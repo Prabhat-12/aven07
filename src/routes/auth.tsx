@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EntryLayout } from "@/components/entry-layout";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -56,26 +57,25 @@ function AuthPage() {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-background px-4 py-10">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center"><span className="text-3xl font-bold text-navy">Avenn</span><p className="mt-1 text-sm text-muted-foreground">Keeping care connected between visits.</p></div>
-        <section className="panel p-6 sm:p-8">
-          <h1 className="text-xl font-bold text-navy">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{mode === "signin" ? "Sign in to continue to your workspace." : "You will choose your role in the next step."}</p>
+    <EntryLayout>
+        <section>
+          <p className="mb-3 text-xs font-bold uppercase text-primary">Your care workspace</p>
+          <h1 className="entry-heading text-3xl font-semibold text-navy">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>
+          <p className="mt-3 text-sm text-muted-foreground">{mode === "signin" ? "Sign in to continue to your workspace." : "You will choose your role in the next step."}</p>
           <form onSubmit={submit} className="mt-6 space-y-4">
-            <label className="block space-y-2"><span className="text-sm font-medium">Email</span><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" /></label>
-            <label className="block space-y-2"><span className="text-sm font-medium">Password</span><Input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === "signin" ? "current-password" : "new-password"} /></label>
+            <label className="block space-y-2"><span className="text-sm font-medium">Email</span><Input className="h-11 rounded-md bg-card" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" /></label>
+            <label className="block space-y-2"><span className="text-sm font-medium">Password</span><Input className="h-11 rounded-md bg-card" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === "signin" ? "current-password" : "new-password"} /></label>
             {error && <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
             {message && <p role="status" className="rounded-lg bg-accent p-3 text-sm text-navy">{message}</p>}
-            <Button type="submit" className="h-11 w-full bg-navy hover:bg-navy/90" disabled={busy}>{busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Sign up"}</Button>
+            <Button type="submit" className="h-11 w-full" disabled={busy}>{busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Sign up"}</Button>
           </form>
           <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" /></div>
           <Button type="button" variant="outline" className="h-11 w-full" onClick={google}>Continue with Google</Button>
           <p className="mt-5 text-center text-sm text-muted-foreground">{mode === "signin" ? "New to Avenn?" : "Already have an account?"}{" "}
-            <button type="button" className="font-medium text-primary underline-offset-4 hover:underline" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(""); setMessage(""); }}>{mode === "signin" ? "Create an account" : "Sign in"}</button></p>
+            <Button type="button" variant="link" className="h-auto p-0" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(""); setMessage(""); }}>{mode === "signin" ? "Create an account" : "Sign in"}</Button></p>
         </section>
-        <p className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="size-4 text-primary" />Patient information is only shown to the people who are allowed to see it.</p>
-      </div>
-    </div>
+        <div className="mt-8 border-t border-border pt-6"><p className="text-sm font-semibold text-navy">Just looking around?</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Explore fictional examples as a doctor, receptionist or patient. No account needed.</p><Button variant="outline" className="mt-4 h-11 w-full justify-between bg-card" onClick={() => navigate({ to: "/guest" })}>Explore as guest <ArrowRight /></Button></div>
+        <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="size-4 text-primary" />Patient information is only shown to the people who are allowed to see it.</p>
+    </EntryLayout>
   );
 }

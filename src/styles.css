@@ -158,3 +158,17 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+.entry-surface {
+  --background: oklch(0.986 0.008 225);
+  --foreground: oklch(0.32 0.035 220);
+  --navy: oklch(0.32 0.035 220);
+  --secondary: oklch(0.94 0.018 220);
+  --primary: oklch(0.64 0.083 222);
+  --accent: oklch(0.94 0.03 220);
+  --border: oklch(0.91 0.025 220);
+  --input: oklch(0.87 0.027 220);
+  --ring: oklch(0.64 0.083 222);
+  font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+}
+.entry-heading { font-family: "Sora", ui-sans-serif, system-ui, sans-serif; }
