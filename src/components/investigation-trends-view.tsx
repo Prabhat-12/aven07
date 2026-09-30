@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Activity, ArrowRight, CalendarDays, ChevronRight, Clock3, FlaskConical, Info, Plus, TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -35,11 +35,15 @@ export function InvestigationTrendsView({ patient, onAdd, onOverview }: Props) {
   const [category, setCategory] = useState<InvestigationCategory>(records[0]?.category ?? "HbA1c");
   const [selectedName, setSelectedName] = useState(records[0]?.item.name ?? "");
   const [range, setRange] = useState("6");
+  const categoryButtons = useRef<Partial<Record<InvestigationCategory, HTMLButtonElement | null>>>({});
   useEffect(() => {
     setCategory(records[0]?.category ?? "HbA1c");
     setSelectedName(records[0]?.item.name ?? "");
     setRange("6");
   }, [patient.id]);
+  useEffect(() => {
+    categoryButtons.current[category]?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [category]);
   const selected = records.find((record) => record.item.name === selectedName);
   const categoryRecords = records.filter((record) => record.category === category);
   const shown = selected ? visibleReadings(selected.readings, Number(range)) : [];
@@ -63,7 +67,7 @@ export function InvestigationTrendsView({ patient, onAdd, onOverview }: Props) {
   return <div className="w-full min-w-0">
     <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><h2 className="text-2xl font-bold text-foreground">Investigations</h2><p className="mt-1 text-sm text-muted-foreground">Track trends and compare recorded results.</p></div><Button onClick={onAdd}><Plus />Assign investigation</Button></div>
     {records.length === 0 ? <div className="rounded-lg border border-border bg-card p-10 text-center"><p className="font-semibold">No investigations yet</p><p className="mt-1 text-sm text-muted-foreground">Assigned investigations and results will appear here.</p></div> : <>
-      <div className="mb-3 flex flex-col gap-3 rounded-lg border border-border bg-card p-2 sm:flex-row sm:items-center sm:justify-between"><div className="flex min-w-0 gap-1 overflow-x-auto" role="group" aria-label="Investigation categories">{investigationCategories.map((name) => <Button key={name} size="sm" variant={category === name ? "secondary" : "ghost"} aria-pressed={category === name} className={cn("shrink-0", category === name && "bg-accent text-foreground hover:bg-accent")} onClick={() => selectCategory(name)}>{name}</Button>)}</div><Select value={range} onValueChange={setRange}><SelectTrigger className="w-full shrink-0 sm:w-36" aria-label="Trend time range"><CalendarDays className="size-4" /><SelectValue /></SelectTrigger><SelectContent><SelectItem value="6">Last 6 months</SelectItem><SelectItem value="12">Last 1 year</SelectItem></SelectContent></Select></div>
+      <div className="mb-3 flex flex-col gap-3 rounded-lg border border-border bg-card p-2 sm:flex-row sm:items-center sm:justify-between"><div className="flex min-w-0 gap-1 overflow-x-auto" role="group" aria-label="Investigation categories">{investigationCategories.map((name) => <Button key={name} ref={(node) => { categoryButtons.current[name] = node; }} size="sm" variant={category === name ? "secondary" : "ghost"} aria-pressed={category === name} className={cn("shrink-0", category === name && "bg-accent text-foreground hover:bg-accent")} onClick={() => selectCategory(name)}>{name}</Button>)}</div><Select value={range} onValueChange={setRange}><SelectTrigger className="w-full shrink-0 sm:w-36" aria-label="Trend time range"><CalendarDays className="size-4" /><SelectValue /></SelectTrigger><SelectContent><SelectItem value="6">Last 6 months</SelectItem><SelectItem value="12">Last 1 year</SelectItem></SelectContent></Select></div>
       {categoryRecords.length === 0 && <p className="mb-3 rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">No investigations recorded in {category}.</p>}
       {selected && categoryRecords.length > 0 && <><div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(290px,1fr)]">
         <section className="min-w-0 rounded-lg border border-border bg-card p-4 sm:p-5" aria-label={`${selected.item.name} results`}>
