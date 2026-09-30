@@ -74,8 +74,8 @@ function Onboarding() {
             <div className="mt-8 grid gap-3">
               {roles.map(({ id, title, note, icon: Icon }) => (
                 <Button key={id} type="button" variant="outline" onClick={() => setRole(id)} className="h-auto min-h-20 w-full justify-start gap-4 whitespace-normal rounded-md bg-card p-4 text-left hover:border-primary">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-md bg-accent text-primary"><Icon className="size-5" /></span>
-                  <span className="min-w-0 flex-1"><strong className="block text-navy">{title}</strong><span className="mt-1 block text-xs font-normal text-muted-foreground">{note}</span></span><ArrowRight className="size-4 text-primary" />
+                  <span className="grid size-11 shrink-0 place-items-center rounded-md bg-secondary text-foreground"><Icon className="size-5" /></span>
+                  <span className="min-w-0 flex-1"><strong className="block text-navy">{title}</strong><span className="mt-1 block text-xs font-normal text-muted-foreground">{note}</span></span><ArrowRight className="size-4 text-foreground" />
                 </Button>
               ))}
             </div>
@@ -83,13 +83,13 @@ function Onboarding() {
             <form onSubmit={save} className="mt-6 space-y-4">
               {field("Full name", "fullName", { autoComplete: "name" })}
               {role === "doctor" && <>{field("Specialty", "specialty")}{field("Clinic or hospital", "clinic")}</>}
-              {role === "receptionist" && <>{field("Clinic or hospital", "clinic")}{field("Your doctor’s sign-up email", "doctorEmail", { type: "email" })}<p className="rounded-lg bg-accent p-3 text-sm text-navy">Your doctor must approve you before you can see the schedule.</p></>}
+              {role === "receptionist" && <>{field("Clinic or hospital", "clinic")}{field("Your doctor’s sign-up email", "doctorEmail", { type: "email" })}<p className="rounded-lg bg-information-surface p-3 text-sm text-navy">Your doctor must approve you before you can see the schedule.</p></>}
               {role === "patient" && <>
                 <div className="grid gap-4 sm:grid-cols-2">{field("UHID (from your clinic)", "uhid", { placeholder: "e.g. SD-00421" })}{field("Phone number on record", "phone", { type: "tel" })}</div>
                 <div className="grid gap-4 sm:grid-cols-3">{field("Date of birth", "dob", { type: "date" })}{field("Height (cm)", "height", { type: "number", min: 50, max: 250 })}{field("Weight (kg)", "weight", { type: "number", min: 10, max: 400 })}</div>
-                <p className="flex items-center gap-2 rounded-lg bg-accent p-3 text-sm text-navy"><HeartPulse className="size-4 shrink-0 text-primary" />We match your UHID and phone number to your clinic record so nobody else can claim it.</p>
+                <p className="flex items-center gap-2 rounded-lg bg-information-surface p-3 text-sm text-navy"><HeartPulse className="size-4 shrink-0 text-foreground" />We match your UHID and phone number to your clinic record so nobody else can claim it.</p>
               </>}
-              {error && <div role="alert" className="rounded-md border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive"><p>{error}</p>{role === "patient" && <Button type="button" variant="outline" className="mt-3" onClick={async () => { await signOut(); navigate({ to: "/guest" }); }}>Explore as guest <ArrowRight /></Button>}</div>}
+              {error && <div role="alert" className="rounded-md border border-destructive/20 bg-critical-surface p-4 text-sm text-destructive"><p>{error}</p>{role === "patient" && <Button type="button" variant="outline" className="mt-3" onClick={async () => { await signOut(); navigate({ to: "/guest" }); }}>Explore as guest <ArrowRight /></Button>}</div>}
               <div className="flex justify-between gap-2 pt-2"><Button type="button" variant="ghost" onClick={() => { setRole(null); setError(""); }}>Back</Button><Button type="submit" disabled={busy}>{busy ? "Saving…" : "Finish setup"}</Button></div>
             </form>
           )}

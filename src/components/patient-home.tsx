@@ -83,15 +83,15 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
     const done = st.tone === "done";
     return (
       <li className="flex items-start gap-3 py-3">
-        <button type="button" aria-label={done ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`} onClick={() => toggleTask.mutate(task)} className={cn("mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border", done ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50 hover:border-primary")}>{done && <Check className="size-3.5" />}</button>
+        <button type="button" aria-label={done ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`} onClick={() => toggleTask.mutate(task)} className={cn("mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border", done ? "border-primary bg-primary text-foreground-foreground" : "border-muted-foreground/50 hover:border-primary")}>{done && <Check className="size-3.5" />}</button>
         <div className="min-w-0 flex-1"><p className={cn("font-medium text-navy", done && "text-muted-foreground line-through")}>{task.title}</p><p className="text-xs text-muted-foreground">{task.detail}{task.dueIso && !done ? ` · Due ${formatIso(task.dueIso)}` : ""}</p></div>
-        <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium", st.tone === "overdue" ? "bg-red-100 text-red-800" : st.tone === "due" ? "bg-amber-100 text-amber-800" : "bg-muted text-muted-foreground")}><Icon className="size-3" />{st.label}</span>
+        <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium", st.tone === "overdue" ? "bg-critical-surface text-critical" : st.tone === "due" ? "bg-warning-surface text-warning" : "bg-muted text-muted-foreground")}><Icon className="size-3" />{st.label}</span>
       </li>
     );
   };
 
   const info = (icon: React.ReactNode, title: string, body: string) => (
-    <div className="flex gap-3 py-3"><span className="mt-0.5 text-primary">{icon}</span><div><h3 className="font-medium text-navy">{title}</h3><p className="mt-0.5 text-sm leading-6 text-muted-foreground">{body}</p></div></div>
+    <div className="flex gap-3 py-3"><span className="mt-0.5 text-foreground">{icon}</span><div><h3 className="font-medium text-navy">{title}</h3><p className="mt-0.5 text-sm leading-6 text-muted-foreground">{body}</p></div></div>
   );
 
   const nextAppt = view?.followIso ? formatIso(view.followIso) : "Not scheduled";
@@ -102,7 +102,7 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
         <span className="text-2xl font-bold text-navy">Avenn</span>
         {!guest && <Button variant="outline" size="sm" onClick={signOut}><LogOut />Sign out</Button>}
       </header>
-      <nav aria-label="Patient sections" className="border-b border-border/60 bg-card px-4 sm:px-8"><div className="mx-auto flex max-w-3xl gap-1 overflow-x-auto">{tabs.map((t) => <button key={t} type="button" aria-current={tab === t ? "page" : undefined} onClick={() => { setTab(t); setFeedback(""); }} className={cn("shrink-0 border-b-2 px-3 py-3 text-sm font-medium", tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-navy")}>{t}</button>)}</div></nav>
+      <nav aria-label="Patient sections" className="border-b border-border/60 bg-card px-4 sm:px-8"><div className="mx-auto flex max-w-3xl gap-1 overflow-x-auto">{tabs.map((t) => <button key={t} type="button" aria-current={tab === t ? "page" : undefined} onClick={() => { setTab(t); setFeedback(""); }} className={cn("shrink-0 border-b-2 px-3 py-3 text-sm font-medium", tab === t ? "border-success text-foreground" : "border-transparent text-muted-foreground hover:text-navy")}>{t}</button>)}</div></nav>
       <main className="mx-auto max-w-3xl space-y-7 px-4 py-8 sm:px-8">
         {!view && !guest && (record.isLoading ? <div className="space-y-3" aria-busy="true"><div className="h-8 w-48 animate-pulse rounded bg-muted" /><div className="h-24 animate-pulse rounded bg-muted" /><div className="h-40 animate-pulse rounded bg-muted" /></div> : <p className="panel p-5 text-sm text-muted-foreground">We couldn't find your care record yet. Nothing has been changed. Please check again shortly.</p>)}
         {feedback && <p role="status" className="rounded-md border border-primary/20 bg-accent px-4 py-3 text-sm text-navy">{feedback}</p>}
@@ -110,10 +110,10 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
         {view && tab === "Home" && <>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div><h1 className="text-2xl font-bold text-navy">Hello, {view.name.split(" ")[0]}</h1><p className="mt-1 text-sm text-muted-foreground">Your care plan and next steps</p></div>
-            <Button className="bg-red-600 text-white hover:bg-red-700" onClick={() => { setEmergency(true); setSent(false); }}><PhoneCall />Emergency (off-hours)</Button>
+            <Button className="bg-critical text-destructive-foreground hover:bg-critical/90" onClick={() => { setEmergency(true); setSent(false); }}><PhoneCall />Emergency (off-hours)</Button>
           </div>
           <section className="panel flex flex-wrap items-center gap-4 p-5">
-            <CalendarDays className="size-6 text-primary" />
+            <CalendarDays className="size-6 text-foreground" />
             <div className="flex-1"><p className="text-xs text-muted-foreground">Next appointment</p><strong className="text-lg text-navy">{nextAppt}</strong><p className="text-xs text-muted-foreground">{guest ? "Dr. Isha Mehta" : "Your care team"}</p></div>
             <StatusBadge status={view.followStatus} />
             <Button variant="outline" size="sm" onClick={() => setTab("Appointments")}>View appointment</Button>
@@ -123,26 +123,26 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
             {open.length === 0 ? <div className="mt-3 rounded-md bg-accent p-5"><p className="font-medium text-navy">You're up to date</p><p className="text-sm text-muted-foreground">There are no outstanding care-plan actions right now.</p></div> : <ul className="mt-2 divide-y divide-border/60">{tasks.map((t) => <TaskRow key={t.id} task={t} />)}</ul>}
             <Button variant="link" className="mt-1 h-auto p-0" onClick={() => setTab("My care")}>View my progress →</Button>
           </section>
-          <section className="flat-section"><h2 className="text-lg font-semibold text-navy">Doctor's note</h2>{view.notes[0] ? <><p className="mt-2 text-xs font-semibold text-primary">{view.notes[0].date} · {view.notes[0].author}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{view.notes[0].text}</p></> : <p className="mt-2 text-sm text-muted-foreground">No notes yet.</p>}<Button variant="link" className="mt-1 h-auto p-0" onClick={() => setTab("Notes")}>View all notes →</Button></section>
-          <section className="rounded-md border border-red-200 bg-red-50 p-5">
-            <h2 className="flex items-center gap-2 font-semibold text-red-700"><AlertTriangle className="size-5" />Warning signs</h2>
-            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-red-900">{warningSigns.map((w) => <li key={w}>{w}</li>)}</ul>
-            <p className="mt-3 text-sm font-semibold text-red-700">Please consult your doctor immediately.</p>
+          <section className="flat-section"><h2 className="text-lg font-semibold text-navy">Doctor's note</h2>{view.notes[0] ? <><p className="mt-2 text-xs font-semibold text-foreground">{view.notes[0].date} · {view.notes[0].author}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{view.notes[0].text}</p></> : <p className="mt-2 text-sm text-muted-foreground">No notes yet.</p>}<Button variant="link" className="mt-1 h-auto p-0" onClick={() => setTab("Notes")}>View all notes →</Button></section>
+          <section className="rounded-md border border-critical/20 bg-critical-surface p-5">
+            <h2 className="flex items-center gap-2 font-semibold text-critical"><AlertTriangle className="size-5" />Warning signs</h2>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-foreground">{warningSigns.map((w) => <li key={w}>{w}</li>)}</ul>
+            <p className="mt-3 text-sm font-semibold text-critical">Please consult your doctor immediately.</p>
           </section>
         </>}
 
         {view && tab === "My care" && <>
-          <div><h1 className="text-2xl font-bold text-navy">My care plan</h1><p className="mt-1 text-sm text-muted-foreground">Progress: <strong className="text-navy">{progress.done} / {progress.total} actions completed</strong></p><div className="mt-3 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={progress.done} aria-valuemax={progress.total} aria-label="Care plan progress"><div className="h-full bg-primary" style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} /></div></div>
+          <div><h1 className="text-2xl font-bold text-navy">My care plan</h1><p className="mt-1 text-sm text-muted-foreground">Progress: <strong className="text-navy">{progress.done} / {progress.total} actions completed</strong></p><div className="mt-3 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={progress.done} aria-valuemax={progress.total} aria-label="Care plan progress"><div className="h-full bg-success" style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} /></div></div>
           <section><h2 className="text-lg font-semibold text-navy">Care actions</h2><ul className="mt-2 divide-y divide-border/60">{tasks.map((t) => <TaskRow key={t.id} task={t} />)}</ul></section>
           <section className="flat-section"><h2 className="text-lg font-semibold text-navy">Care timeline</h2>
             <ol className="mt-3 space-y-4 border-l border-border pl-5">
-              {[...tasks].sort((a, b) => (a.dueIso ?? "").localeCompare(b.dueIso ?? "")).filter((t) => t.dueIso).map((t) => <li key={t.id} className="relative"><span className="absolute -left-[1.6rem] top-1 size-2.5 rounded-full bg-primary" /><p className="text-xs font-semibold text-primary">{formatIso(t.dueIso)}</p><p className="text-sm font-medium text-navy">{t.title}</p><p className="text-xs text-muted-foreground">{taskState(t).label}</p></li>)}
-              <li className="relative"><span className="absolute -left-[1.6rem] top-1 size-2.5 rounded-full border-2 border-primary bg-card" /><p className="text-xs font-semibold text-primary">{nextAppt}</p><p className="text-sm font-medium text-navy">Next follow-up</p><p className="text-xs text-muted-foreground">{view.followStatus}</p></li>
+              {[...tasks].sort((a, b) => (a.dueIso ?? "").localeCompare(b.dueIso ?? "")).filter((t) => t.dueIso).map((t) => <li key={t.id} className="relative"><span className="absolute -left-[1.6rem] top-1 size-2.5 rounded-full bg-success" /><p className="text-xs font-semibold text-foreground">{formatIso(t.dueIso)}</p><p className="text-sm font-medium text-navy">{t.title}</p><p className="text-xs text-muted-foreground">{taskState(t).label}</p></li>)}
+              <li className="relative"><span className="absolute -left-[1.6rem] top-1 size-2.5 rounded-full border-2 border-primary bg-card" /><p className="text-xs font-semibold text-foreground">{nextAppt}</p><p className="text-sm font-medium text-navy">Next follow-up</p><p className="text-xs text-muted-foreground">{view.followStatus}</p></li>
             </ol>
           </section>
           <section className="flat-section">
             <h2 className="text-lg font-semibold text-navy">How are you doing with your plan?</h2>
-            <div role="radiogroup" aria-label="Plan check-in" className="mt-3 grid gap-2">{CHECKIN_OPTIONS.map((o) => <button key={o} type="button" role="radio" aria-checked={checkStatus === o} onClick={() => setCheckStatus(o)} className={cn("flex items-center gap-3 rounded-md border px-4 py-3 text-left text-sm", checkStatus === o ? "border-primary bg-accent text-navy" : "border-border bg-card hover:border-primary/50")}><span className={cn("grid size-4 place-items-center rounded-full border", checkStatus === o ? "border-primary" : "border-muted-foreground/50")}>{checkStatus === o && <span className="size-2 rounded-full bg-primary" />}</span>{o}</button>)}</div>
+            <div role="radiogroup" aria-label="Plan check-in" className="mt-3 grid gap-2">{CHECKIN_OPTIONS.map((o) => <button key={o} type="button" role="radio" aria-checked={checkStatus === o} onClick={() => setCheckStatus(o)} className={cn("flex items-center gap-3 rounded-md border px-4 py-3 text-left text-sm", checkStatus === o ? "border-success bg-accent text-navy" : "border-border bg-card hover:border-primary/50")}><span className={cn("grid size-4 place-items-center rounded-full border", checkStatus === o ? "border-primary" : "border-muted-foreground/50")}>{checkStatus === o && <span className="size-2 rounded-full bg-success" />}</span>{o}</button>)}</div>
             {needsText && <Textarea className="mt-3" aria-label="What is making it difficult?" placeholder="Tell your doctor what is making it difficult (optional)" value={checkText} onChange={(e) => setCheckText(e.target.value)} maxLength={400} />}
             <Button className="mt-3" disabled={!checkStatus || checkIn.isPending} onClick={() => checkIn.mutate()}>{checkIn.isPending ? "Sending…" : "Send to my doctor"}</Button>
             {view.checkins[0] && <p className="mt-3 text-xs text-muted-foreground">Last update {view.checkins[0].date}: {view.checkins[0].status}{view.checkins[0].message ? ` — "${view.checkins[0].message}"` : ""}</p>}
@@ -158,22 +158,22 @@ export function PatientHome({ guest }: { guest?: GuestProps } = {}) {
         {view && tab === "Appointments" && <>
           <h1 className="text-2xl font-bold text-navy">Appointments</h1>
           <section><h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Upcoming</h2>
-            <div className="panel mt-2 flex flex-wrap items-center gap-4 p-5"><CalendarDays className="size-6 text-primary" /><div className="flex-1"><strong className="text-lg text-navy">{nextAppt}</strong><p className="text-sm text-muted-foreground">{guest ? "Dr. Isha Mehta · " : ""}Follow-up</p><p className="mt-1 text-xs text-muted-foreground">Status: {view.apptStatus}</p></div><StatusBadge status={view.followStatus} /></div>
+            <div className="panel mt-2 flex flex-wrap items-center gap-4 p-5"><CalendarDays className="size-6 text-foreground" /><div className="flex-1"><strong className="text-lg text-navy">{nextAppt}</strong><p className="text-sm text-muted-foreground">{guest ? "Dr. Isha Mehta · " : ""}Follow-up</p><p className="mt-1 text-xs text-muted-foreground">Status: {view.apptStatus}</p></div><StatusBadge status={view.followStatus} /></div>
             <p className="mt-2 text-xs text-muted-foreground">To change this date, please contact the clinic. The clinic will confirm the new time.</p>
           </section>
           <section className="flat-section"><h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Previous</h2>
-            <div className="mt-2 flex items-center gap-4 py-2"><Check className="size-5 text-primary" /><div><strong className="text-navy">18 Sep 2026</strong><p className="text-sm text-muted-foreground">Consultation completed</p></div></div>
+            <div className="mt-2 flex items-center gap-4 py-2"><Check className="size-5 text-foreground" /><div><strong className="text-navy">18 Sep 2026</strong><p className="text-sm text-muted-foreground">Consultation completed</p></div></div>
           </section>
         </>}
 
         {view && tab === "Notes" && <>
           <div><h1 className="text-2xl font-bold text-navy">Notes from your doctor</h1><p className="mt-1 text-sm text-muted-foreground">Only notes your doctor chose to share with you appear here.</p></div>
-          <div className="divide-y divide-border/60">{view.notes.length === 0 && <p className="py-3 text-sm text-muted-foreground">No notes yet.</p>}{view.notes.map((n) => <article key={n.id} className="py-4"><p className="text-xs font-semibold text-primary">{n.date} · {n.author}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{n.text}</p></article>)}</div>
+          <div className="divide-y divide-border/60">{view.notes.length === 0 && <p className="py-3 text-sm text-muted-foreground">No notes yet.</p>}{view.notes.map((n) => <article key={n.id} className="py-4"><p className="text-xs font-semibold text-foreground">{n.date} · {n.author}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{n.text}</p></article>)}</div>
         </>}
       </main>
       <Dialog open={emergency} onOpenChange={setEmergency}>
         <DialogContent className="sm:max-w-md"><DialogHeader><DialogTitle>Emergency (off-hours)</DialogTitle><DialogDescription>For urgent problems outside clinic hours. For life-threatening symptoms, call your local emergency number first.</DialogDescription></DialogHeader>
-          {sent ? <p role="status" className="rounded-lg bg-accent p-3 text-sm text-navy">Request noted. In this prototype no real call is placed yet.</p> : <Button className="bg-red-600 text-white hover:bg-red-700" onClick={() => setSent(true)}>Contact my doctor now</Button>}
+          {sent ? <p role="status" className="rounded-lg bg-accent p-3 text-sm text-navy">Request noted. In this prototype no real call is placed yet.</p> : <Button className="bg-critical text-destructive-foreground hover:bg-critical/90" onClick={() => setSent(true)}>Contact my doctor now</Button>}
         </DialogContent>
       </Dialog>
     </div>
