@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,7 +74,7 @@ function AuthPage() {
           <p className="mt-5 text-center text-sm text-muted-foreground">{mode === "signin" ? "New to Avenn?" : "Already have an account?"}{" "}
             <Button type="button" variant="link" className="h-auto p-0" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(""); setMessage(""); }}>{mode === "signin" ? "Create an account" : "Sign in"}</Button></p>
         </section>
-        <div className="mt-8 border-t border-border pt-6"><p className="text-sm font-semibold text-navy">Just looking around?</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Explore fictional examples as a doctor, receptionist or patient. No account needed.</p><Button variant="outline" className="mt-4 h-11 w-full justify-between bg-card" onClick={() => navigate({ to: "/guest" })}>Explore as guest <ArrowRight /></Button></div>
+        <div className="mt-8 border-t border-border pt-6"><p className="text-sm font-semibold text-navy">Just looking around?</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Explore fictional examples as a doctor, receptionist or patient. No account needed.</p><Button asChild variant="outline" className="mt-4 h-11 w-full justify-between bg-card"><Link to="/guest">Explore as guest <ArrowRight /></Link></Button></div>
         <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="size-4 text-primary" />Patient information is only shown to the people who are allowed to see it.</p>
     </EntryLayout>
   );
