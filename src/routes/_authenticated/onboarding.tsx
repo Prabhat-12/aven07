@@ -2,12 +2,13 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { HeartPulse, Stethoscope, UserRound, ClipboardList } from "lucide-react";
+import { ArrowRight, HeartPulse, Stethoscope, UserRound, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useAccount, useSignOut, type Role } from "@/lib/account";
 import { completeOnboarding } from "@/lib/onboarding.functions";
+import { EntryLayout } from "@/components/entry-layout";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
@@ -60,24 +61,22 @@ function Onboarding() {
   };
 
   const field = (label: string, key: keyof typeof form, props: React.ComponentProps<typeof Input> = {}) => (
-    <label className="block space-y-2"><span className="text-sm font-medium">{label}</span><Input required value={form[key]} onChange={set(key)} {...props} /></label>
+    <label className="block space-y-2"><span className="text-sm font-medium">{label}</span><Input required className="h-11 rounded-md bg-card" value={form[key]} onChange={set(key)} {...props} /></label>
   );
 
   return (
-    <div className="grid min-h-screen place-items-center bg-background px-4 py-10">
-      <div className="w-full max-w-2xl">
-        <div className="mb-6 flex items-center justify-between"><span className="text-3xl font-bold text-navy">Avenn</span><Button variant="ghost" size="sm" onClick={signOut}>Sign out</Button></div>
-        <section className="panel p-6 sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Step {role ? 2 : 1} of 2</p>
-          <h1 className="mt-1 text-2xl font-bold text-navy">{role ? `Your ${role} details` : "How will you use Avenn?"}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Your role decides what you can see. It is saved to your account and cannot be changed from the app.</p>
+    <EntryLayout step={role ? 2 : 1}>
+        <section>
+          <div className="mb-6 flex justify-end"><Button variant="ghost" size="sm" onClick={signOut}>Sign out</Button></div>
+          <h1 className="entry-heading text-3xl font-semibold text-navy">{role ? `Your ${role} details` : "How will you use Avenn?"}</h1>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">Your role decides what you can see. It is saved to your account and cannot be changed from the app.</p>
           {!role ? (
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="mt-8 grid gap-3">
               {roles.map(({ id, title, note, icon: Icon }) => (
-                <button key={id} type="button" onClick={() => setRole(id)} className="rounded-2xl border border-border bg-card p-5 text-left transition hover:border-primary hover:shadow-soft">
-                  <span className="grid size-11 place-items-center rounded-xl bg-accent text-primary"><Icon className="size-5" /></span>
-                  <strong className="mt-4 block text-navy">{title}</strong><span className="mt-1 block text-sm text-muted-foreground">{note}</span>
-                </button>
+                <Button key={id} type="button" variant="outline" onClick={() => setRole(id)} className="h-auto min-h-20 w-full justify-start gap-4 whitespace-normal rounded-md bg-card p-4 text-left hover:border-primary">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-md bg-accent text-primary"><Icon className="size-5" /></span>
+                  <span className="min-w-0 flex-1"><strong className="block text-navy">{title}</strong><span className="mt-1 block text-xs font-normal text-muted-foreground">{note}</span></span><ArrowRight className="size-4 text-primary" />
+                </Button>
               ))}
             </div>
           ) : (
@@ -90,12 +89,11 @@ function Onboarding() {
                 <div className="grid gap-4 sm:grid-cols-3">{field("Date of birth", "dob", { type: "date" })}{field("Height (cm)", "height", { type: "number", min: 50, max: 250 })}{field("Weight (kg)", "weight", { type: "number", min: 10, max: 400 })}</div>
                 <p className="flex items-center gap-2 rounded-lg bg-accent p-3 text-sm text-navy"><HeartPulse className="size-4 shrink-0 text-primary" />We match your UHID and phone number to your clinic record so nobody else can claim it.</p>
               </>}
-              {error && <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
-              <div className="flex justify-between gap-2 pt-2"><Button type="button" variant="ghost" onClick={() => { setRole(null); setError(""); }}>Back</Button><Button type="submit" className="bg-navy hover:bg-navy/90" disabled={busy}>{busy ? "Saving…" : "Finish setup"}</Button></div>
+              {error && <div role="alert" className="rounded-md border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive"><p>{error}</p>{role === "patient" && <Button type="button" variant="outline" className="mt-3" onClick={async () => { await signOut(); navigate({ to: "/guest" }); }}>Explore as guest <ArrowRight /></Button>}</div>}
+              <div className="flex justify-between gap-2 pt-2"><Button type="button" variant="ghost" onClick={() => { setRole(null); setError(""); }}>Back</Button><Button type="submit" disabled={busy}>{busy ? "Saving…" : "Finish setup"}</Button></div>
             </form>
           )}
         </section>
-      </div>
-    </div>
+    </EntryLayout>
   );
 }

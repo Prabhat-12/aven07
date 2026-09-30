@@ -13,11 +13,11 @@ type Row = { id: string; name: string; follow_up_date: string | null; follow_up_
 const filters = ["All", "Due this week", "Upcoming", STATUS_LOST];
 
 // Receptionists only ever request name and follow-up schedule columns.
-export function ReceptionistView() {
-  const account = useAccount();
+export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { guestRows?: Row[]; onGuestRowsChange?: (rows: Row[]) => void; guestName?: string } = {}) {
+  const account = useAccount(!guestRows);
   const signOut = useSignOut();
   const queryClient = useQueryClient();
-  const approved = account.data?.profile?.approved ?? false;
+  const approved = guestRows ? true : (account.data?.profile?.approved ?? false);
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Row | null>(null);
@@ -25,7 +25,7 @@ export function ReceptionistView() {
 
   const rows = useQuery({
     queryKey: ["reception-schedule"],
-    enabled: approved,
+    enabled: approved && !guestRows,
     queryFn: async (): Promise<Row[]> => {
       const { data, error } = await supabase.from("patients").select("id, name, follow_up_date, follow_up_status").order("follow_up_date");
       if (error) throw error;
@@ -36,13 +36,14 @@ export function ReceptionistView() {
   const save = useMutation({
     mutationFn: async () => {
       if (!editing) return;
+      if (guestRows) { onGuestRowsChange?.(guestRows.map((row) => row.id === editing.id ? { ...row, follow_up_date: date, follow_up_status: followUpStatusFor(date) } : row)); return; }
       const { error } = await supabase.from("patients").update({ follow_up_date: date, follow_up_status: followUpStatusFor(date) }).eq("id", editing.id);
       if (error) throw error;
     },
     onSuccess: () => { setEditing(null); queryClient.invalidateQueries({ queryKey: ["reception-schedule"] }); },
   });
 
-  const list = rows.data ?? [];
+  const list = guestRows ?? rows.data ?? [];
   const visible = useMemo(() => list.filter((r) => (filter === "All" || r.follow_up_status === filter) && r.name.toLowerCase().includes(search.toLowerCase())), [list, filter, search]);
   const count = (s: string) => list.filter((r) => r.follow_up_status === s).length;
 
@@ -50,7 +51,7 @@ export function ReceptionistView() {
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between border-b border-border/60 bg-card px-4 py-3 sm:px-8">
         <span className="text-2xl font-bold text-navy">Avenn</span>
-        <div className="flex items-center gap-3"><span className="hidden text-sm text-muted-foreground sm:block">{account.data?.profile?.full_name} · Receptionist</span><Button variant="outline" size="sm" onClick={signOut}><LogOut />Sign out</Button></div>
+        <div className="flex items-center gap-3"><span className="hidden text-sm text-muted-foreground sm:block">{guestRows ? guestName : account.data?.profile?.full_name} · Receptionist</span>{!guestRows && <Button variant="outline" size="sm" onClick={signOut}><LogOut />Sign out</Button>}</div>
       </header>
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-8">
         {!approved ? (
@@ -70,8 +71,8 @@ export function ReceptionistView() {
                 <div className="relative sm:w-64"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input className="pl-9" placeholder="Search patient name" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
               </div>
               <div className="mt-4 divide-y divide-border/60">
-                {rows.isLoading && <p className="p-6 text-sm text-muted-foreground">Loading schedule…</p>}
-                {!rows.isLoading && visible.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">No patients match this view.</p>}
+                 {!guestRows && rows.isLoading && <p className="p-6 text-sm text-muted-foreground">Loading schedule…</p>}
+                 {(guestRows || !rows.isLoading) && visible.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">No patients match this view.</p>}
                 {visible.map((r) => (
                   <div key={r.id} className="flex flex-wrap items-center gap-3 py-3">
                     <span className="grid size-10 place-items-center rounded-full bg-accent text-sm font-semibold text-primary">{r.name.split(" ").map((p) => p[0]).join("").slice(0, 2)}</span>

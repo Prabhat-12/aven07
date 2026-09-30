@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount, useSignOut } from "@/lib/account";
 import { addPatientNote, loadDoctorPatients, saveClinicalPatch, saveFollowUp } from "@/lib/doctor-data";
-import { STATUS_LOST, type Comparison, type Medication, type Metric, type Note, type Patient, type Point, type Task } from "@/lib/patient-types";
+import { STATUS_LOST, followUpStatusFor, type Comparison, type Medication, type Metric, type Note, type Patient, type Point, type Task } from "@/lib/patient-types";
 import { StatusBadge } from "@/components/status-badge";
 import priyaImage from "@/assets/priya-sharma.jpg";
 
@@ -41,12 +41,6 @@ const useDoctor = () => useContext(DoctorCtx);
 
 let lastSelectedPatientId = "";
 
-const inbox = [
-  { name: "Asha Sharma", preview: "I have uploaded this week’s glucose readings.", time: "10:42", unread: 2 },
-  { name: "Raj Mehta", preview: "Should I continue the same dose?", time: "09:18", unread: 1 },
-  { name: "Neha Gupta", preview: "My lab appointment is confirmed for Monday.", time: "Yesterday", unread: 0 },
-  { name: "Vikram Singh", preview: "Thank you, doctor.", time: "Yesterday", unread: 0 },
-];
 const tabIcons = { Overview: Home, Investigations: FlaskConical, "Care Plan": ClipboardCheck, "Previous Visits": Clock3, Notes: MessageSquare };
 const initials = (name: string) => name.split(" ").map((part) => part[0]).join("");
 
@@ -64,7 +58,13 @@ export function AvennDashboard({ initialPage = "patients" }: { initialPage?: Wor
   return <DoctorCtx.Provider value={doctor}><PatientsCtx.Provider value={list}><DashboardShell initialPage={initialPage} /></PatientsCtx.Provider></DoctorCtx.Provider>;
 }
 
-function DashboardShell({ initialPage }: { initialPage: WorkspacePage }) {
+// Guest data never enters a live query or mutation. This adapter only shares presentation.
+export function GuestDoctorDashboard({ patients, page, onPageChange, onPatientsChange, name, specialty }: { patients: Patient[]; page: WorkspacePage; onPageChange: (page: WorkspacePage) => void; onPatientsChange: (patients: Patient[]) => void; name: string; specialty: string }) {
+  const doctor: Doctor = { name, email: "guest@example.invalid", specialty };
+  return <DoctorCtx.Provider value={doctor}><PatientsCtx.Provider value={patients}><DashboardShell initialPage={page} guest={{ onPageChange, onPatientsChange }} /></PatientsCtx.Provider></DoctorCtx.Provider>;
+}
+
+function DashboardShell({ initialPage, guest }: { initialPage: WorkspacePage; guest?: { onPageChange: (page: WorkspacePage) => void; onPatientsChange: (patients: Patient[]) => void } }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const patients = usePatients();
@@ -88,12 +88,21 @@ function DashboardShell({ initialPage }: { initialPage: WorkspacePage }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
 
-  const persistTasks: React.Dispatch<React.SetStateAction<Task[]>> = (updater) => setTasks((current) => {
-    const next = typeof updater === "function" ? updater(current) : updater;
-    void saveClinicalPatch(currentPatient, { tasks: next });
-    return next;
-  });
-  const persistMedications = (next: Medication[]) => { setMedications(next); void saveClinicalPatch(currentPatient, { medications: next }); };
+  const persistTasks: React.Dispatch<React.SetStateAction<Task[]>> = (updater) => {
+    const next = typeof updater === "function" ? updater(tasks) : updater;
+    setTasks(next);
+    if (guest) guest.onPatientsChange(patients.map((p) => p.id === currentPatient.id ? { ...p, tasks: next } : p));
+    else void saveClinicalPatch(currentPatient, { tasks: next });
+  };
+  const persistMedications = (next: Medication[]) => {
+    setMedications(next);
+    if (guest) guest.onPatientsChange(patients.map((p) => p.id === currentPatient.id ? { ...p, medications: next } : p));
+    else void saveClinicalPatch(currentPatient, { medications: next });
+  };
+  const goTo = (to: "/dashboard" | "/patients" | "/follow-ups" | "/investigations" | "/messages") => {
+    if (guest) guest.onPageChange(to.slice(1) as WorkspacePage);
+    else navigate({ to });
+  };
 
   const matches = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -108,13 +117,17 @@ function DashboardShell({ initialPage }: { initialPage: WorkspacePage }) {
     setMedications(patient.medications);
     setTab("Overview");
     setSearch("");
-    if (navigateToPatients && initialPage !== "patients") navigate({ to: "/patients" });
+    if (navigateToPatients && initialPage !== "patients") goTo("/patients");
   };
 
   const saveFollow = async () => {
     try {
-      await saveFollowUp(currentPatient.dbId, followDate);
-      await queryClient.invalidateQueries({ queryKey: ["doctor-patients"] });
+      if (guest) {
+        guest.onPatientsChange(patients.map((p) => p.id === currentPatient.id ? { ...p, followUpIso: followDate, followUp: new Date(`${followDate}T00:00:00Z`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }), followUpStatus: followUpStatusFor(followDate) } : p));
+      } else {
+        await saveFollowUp(currentPatient.dbId, followDate);
+        await queryClient.invalidateQueries({ queryKey: ["doctor-patients"] });
+      }
       setFollowOpen(false);
       setFeedback("Follow-up saved");
     } catch { setFeedback("Could not save the follow-up. Please try again."); }
@@ -124,8 +137,10 @@ function DashboardShell({ initialPage }: { initialPage: WorkspacePage }) {
     if (simpleModal === "note") {
       const text = value.trim() || "New patient note";
       try {
-        await addPatientNote(currentPatient.dbId, doctor.name, text);
-        setNotes((n) => [{ date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }), author: doctor.name, text }, ...n]);
+        if (!guest) await addPatientNote(currentPatient.dbId, doctor.name, text);
+        const nextNote = { date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }), author: doctor.name, text };
+        setNotes((n) => [nextNote, ...n]);
+        if (guest) guest.onPatientsChange(patients.map((p) => p.id === currentPatient.id ? { ...p, notes: [nextNote, ...p.notes] } : p));
         setFeedback("Note saved and shared with the patient");
       } catch { setFeedback("Could not save the note."); }
     }
@@ -137,9 +152,9 @@ function DashboardShell({ initialPage }: { initialPage: WorkspacePage }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} active={initialPage} />
+      <Sidebar open={mobileNav} onClose={() => setMobileNav(false)} active={initialPage} {...(guest ? { onNavigate: goTo } : {})} />
       <main className="min-h-screen lg:pl-48">
-        <TopHeader search={search} setSearch={setSearch} matches={matches} onSelect={selectPatient} onMenu={() => setMobileNav(true)} onNotifications={() => setNotificationsOpen(true)} onProfile={() => setProfileOpen(true)} />
+        <TopHeader search={search} setSearch={setSearch} matches={matches} onSelect={selectPatient} onMenu={() => setMobileNav(true)} onNotifications={() => setNotificationsOpen(true)} onProfile={() => guest ? setFeedback("Guest doctor · fictional sample records") : setProfileOpen(true)} />
         <div className="mx-auto w-full max-w-[1600px] px-3 pb-24 sm:px-5 lg:px-7 lg:pb-8">
           {initialPage === "patients" ? <>
             <PatientHeader patient={currentPatient} medications={medications} onFollow={() => setFollowOpen(true)} onConsult={() => { setConsultStep(1); setConsultOpen(true); }} />
@@ -152,7 +167,7 @@ function DashboardShell({ initialPage }: { initialPage: WorkspacePage }) {
               {tab === "Notes" && <NotesPage patient={currentPatient} notes={notes} onAdd={() => setSimpleModal("note")} />}
             </div>
           </> : null}
-          {initialPage === "dashboard" && <PracticeDashboard onNavigate={(to) => navigate({ to })} onSelectPatient={selectPatient} />}
+          {initialPage === "dashboard" && <PracticeDashboard onNavigate={goTo} onSelectPatient={selectPatient} />}
           {initialPage === "follow-ups" && <FollowUpsPage onAssign={() => setFollowOpen(true)} onOpenPatient={selectPatient} />}
           {initialPage === "investigations" && <PracticeInvestigations onAssign={() => setSimpleModal("investigation")} onOpenPatient={selectPatient} />}
           {initialPage === "messages" && <MessagesPage />}
@@ -164,7 +179,7 @@ function DashboardShell({ initialPage }: { initialPage: WorkspacePage }) {
       <ConsultationDialog open={consultOpen} onOpenChange={setConsultOpen} patient={currentPatient} step={consultStep} setStep={setConsultStep} onComplete={() => { setConsultOpen(false); setConsultStep(1); setFeedback("Consultation completed"); }} />
       <SimpleFormDialog type={simpleModal} onClose={() => setSimpleModal(null)} onSave={saveSimple} />
       <NotificationsSheet open={notificationsOpen} onOpenChange={setNotificationsOpen} />
-      <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />
+      {!guest && <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />}
       {feedback && <div role="status" className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-soft"><Check className="size-4 text-primary"/>{feedback}<Button size="icon" variant="ghost" className="size-7" onClick={() => setFeedback("")} aria-label="Dismiss message"><X/></Button></div>}
       {initialPage === "patients" && <div className="fixed inset-x-3 bottom-3 z-40 flex gap-2 rounded-2xl border border-border/70 bg-card/90 p-2 shadow-xl backdrop-blur-xl lg:hidden">
         <Button variant="outline" className="h-11 flex-1" onClick={() => setFollowOpen(true)}><CalendarDays /> Follow-up</Button>
@@ -199,7 +214,7 @@ function CholesterolCard({ patient }: { patient: Patient }) {
   </>;
 }
 
-function Sidebar({ open, onClose, active }: { open: boolean; onClose: () => void; active: WorkspacePage }) {
+function Sidebar({ open, onClose, active, onNavigate }: { open: boolean; onClose: () => void; active: WorkspacePage; onNavigate?: (to: "/dashboard" | "/patients" | "/follow-ups" | "/investigations" | "/messages") => void }) {
   const doctor = useDoctor();
   const nav = [
     ["Dashboard", Home, "/dashboard"], ["Patients", Users, "/patients"], ["Follow-ups", Clock3, "/follow-ups"], ["Messages", MessageSquare, "/messages"],
@@ -208,7 +223,7 @@ function Sidebar({ open, onClose, active }: { open: boolean; onClose: () => void
     {open && <div className="fixed inset-0 z-40 bg-overlay lg:hidden" onClick={onClose} aria-hidden />}
     <aside className={cn("fixed inset-y-0 left-0 z-50 flex w-48 flex-col border-r border-border/50 bg-sidebar/95 px-4 py-6 backdrop-blur-xl transition-transform lg:translate-x-0", open ? "translate-x-0" : "-translate-x-full")}>
       <div className="mb-8 flex items-center justify-between px-2"><span className="text-2xl font-bold tracking-normal text-navy">Avenn</span><Button size="icon" variant="ghost" className="lg:hidden" onClick={onClose} aria-label="Close navigation"><X /></Button></div>
-      <nav className="space-y-2" aria-label="Main navigation">{nav.map(([label, Icon, to]) => <Button key={label} asChild variant="ghost" className={cn("w-full justify-start gap-3 px-3 text-muted-foreground", active === label.toLowerCase() && "bg-accent text-primary shadow-sm hover:bg-accent")}><Link to={to} onClick={onClose}><Icon />{label}</Link></Button>)}</nav>
+      <nav className="space-y-2" aria-label="Main navigation">{nav.map(([label, Icon, to]) => onNavigate ? <Button key={label} variant="ghost" onClick={() => { onNavigate(to); onClose(); }} className={cn("w-full justify-start gap-3 px-3 text-muted-foreground", active === label.toLowerCase() && "bg-accent text-primary shadow-sm hover:bg-accent")}><Icon />{label}</Button> : <Button key={label} asChild variant="ghost" className={cn("w-full justify-start gap-3 px-3 text-muted-foreground", active === label.toLowerCase() && "bg-accent text-primary shadow-sm hover:bg-accent")}><Link to={to} onClick={onClose}><Icon />{label}</Link></Button>)}</nav>
       <div className="mt-auto border-t border-border/60 pt-5"><div className="flex items-center gap-3 px-2"><DoctorAvatar className="size-9"/><div><p className="text-xs font-semibold">{doctor.name}</p><p className="text-xs text-muted-foreground">{doctor.specialty}</p></div></div><p className="px-2 pt-5 text-xs leading-relaxed text-muted-foreground">Keeping care connected between visits.</p></div>
     </aside>
   </>;
@@ -406,7 +421,9 @@ function PracticeInvestigations({ onAssign, onOpenPatient }: { onAssign: () => v
 }
 
 function MessagesPage() {
-  const initialThread = inbox[0] ?? { name: "Asha Sharma", preview: "", time: "", unread: 0 };
+  const patients = usePatients();
+  const inbox = patients.map((patient, index) => ({ name: patient.name, preview: ["I have uploaded this week’s glucose readings.", "Should I continue the same dose?", "My lab appointment is confirmed for Monday.", "Thank you, doctor."][index % 4] ?? "Hello doctor.", time: ["10:42", "09:18", "Yesterday"][index % 3] ?? "Yesterday", unread: index === 0 ? 2 : index === 1 ? 1 : 0 }));
+  const initialThread = inbox[0] ?? { name: "Patient", preview: "", time: "", unread: 0 };
   const [selected, setSelected] = useState(initialThread);
   const [draft, setDraft] = useState("");
   const [sent, setSent] = useState<string[]>([]);
