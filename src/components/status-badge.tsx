@@ -1,13 +1,14 @@
+import { AlertCircle, CalendarClock, Check, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { STATUS_LOST } from "@/lib/patient-types";
 
-// "Lost to Follow-up" is a solid red box; other states stay calm.
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
   const lost = status === STATUS_LOST;
   const tone = lost
-    ? "bg-red-600 text-white"
+    ? "bg-critical-surface text-critical"
     : status === "Due this week"
-      ? "bg-amber-100 text-amber-800"
-      : "bg-accent text-primary";
-  return <span className={cn("inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold", tone, className)}>{status}</span>;
+      ? "bg-warning-surface text-warning"
+      : status === "Completed" || status === "Confirmed" ? "bg-success-surface text-success" : "bg-secondary text-muted-foreground";
+  const Icon = lost ? AlertCircle : status === "Due this week" ? CalendarClock : status === "Completed" || status === "Confirmed" ? Check : Circle;
+  return <span className={cn("inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold", tone, className)}><Icon className="size-3" />{status}</span>;
 }
