@@ -57,7 +57,7 @@
 
 ## UI Rules audit rollout
 - [x] 1. Brand tokens applied and verified; system fonts; chart palette
-- [ ] 2. Accessibility MUSTs (names, keyboard, focus, contrast)
+- [x] 2. Accessibility MUSTs: patient check-in, tasks, progress, reception no-show confirm, labels, focus offset (doctor dashboard buttons still open)
 - [ ] 3. Shared components (tabs, dialogs, fields, status chip, toasts, skeletons, empty states)
 - [ ] 4. Screen passes: Doctor, Patient, Receptionist, Entry/guest
 - [ ] 5. Final compliance check
