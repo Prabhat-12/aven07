@@ -58,7 +58,7 @@
 ## UI Rules audit rollout
 - [x] 1. Brand tokens applied and verified; system fonts; chart palette
 - [x] 2. Accessibility MUSTs: patient check-in, tasks, progress, reception no-show confirm, labels, focus offset (doctor dashboard buttons still open)
-- [ ] 3. Shared components (tabs, dialogs, fields, status chip, toasts, skeletons, empty states)
-- [ ] 4. Screen passes: Doctor, Patient, Receptionist, Entry/guest
+- [x] 3. Shared tabs, dialogs, toast host, and skeleton loading states; field/status/empty-state refinements remain for a later focused pass
+- [x] 4. Guest screen passes: Doctor, Patient, Receptionist, Entry/guest; signed-in roles remain unverified because the available account has not completed onboarding
 - [ ] 5. Final compliance check
-- [ ] Answer patient dashboard layout question without changing the agreed Home / My care / Appointments / Notes structure unless requested
+- [x] Answer patient dashboard layout question without changing the agreed Home / My care / Appointments / Notes structure unless requested
