@@ -17,13 +17,13 @@ function exercise(bmi: number) {
   return { title: "Low-impact and regular", body: "Begin with 10 to 15 minute walks after meals, building toward 30 minutes. Choose low-impact options like swimming or cycling." };
 }
 
-export function PatientHome({ guestRecord }: { guestRecord?: { name: string; follow_up_date: string; follow_up_status: string; note: string } } = {}) {
+export function PatientHome({ guestRecord }: { guestRecord?: { name: string; follow_up_date: string; follow_up_status: string; note: string; heightCm: number; weightKg: number } } = {}) {
   const account = useAccount(!guestRecord);
   const signOut = useSignOut();
   const [emergency, setEmergency] = useState(false);
   const [sent, setSent] = useState(false);
   const profile = account.data?.profile;
-  const bmi = guestRecord ? 68 / Math.pow(1.62, 2) : profile?.height_cm && profile?.weight_kg ? profile.weight_kg / Math.pow(profile.height_cm / 100, 2) : null;
+  const bmi = guestRecord ? guestRecord.heightCm > 0 && guestRecord.weightKg > 0 ? guestRecord.weightKg / Math.pow(guestRecord.heightCm / 100, 2) : null : profile?.height_cm && profile?.weight_kg ? profile.weight_kg / Math.pow(profile.height_cm / 100, 2) : null;
   const plan = bmi ? exercise(bmi) : null;
 
   const record = useQuery({

@@ -13,7 +13,7 @@ type Row = { id: string; name: string; follow_up_date: string | null; follow_up_
 const filters = ["All", "Due this week", "Upcoming", STATUS_LOST];
 
 // Receptionists only ever request name and follow-up schedule columns.
-export function ReceptionistView({ guestRows, onGuestRowsChange }: { guestRows?: Row[]; onGuestRowsChange?: (rows: Row[]) => void } = {}) {
+export function ReceptionistView({ guestRows, onGuestRowsChange, guestName }: { guestRows?: Row[]; onGuestRowsChange?: (rows: Row[]) => void; guestName?: string } = {}) {
   const account = useAccount(!guestRows);
   const signOut = useSignOut();
   const queryClient = useQueryClient();
@@ -51,7 +51,7 @@ export function ReceptionistView({ guestRows, onGuestRowsChange }: { guestRows?:
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between border-b border-border/60 bg-card px-4 py-3 sm:px-8">
         <span className="text-2xl font-bold text-navy">Avenn</span>
-        <div className="flex items-center gap-3"><span className="hidden text-sm text-muted-foreground sm:block">{guestRows ? "Samira Das" : account.data?.profile?.full_name} · Receptionist</span>{!guestRows && <Button variant="outline" size="sm" onClick={signOut}><LogOut />Sign out</Button>}</div>
+        <div className="flex items-center gap-3"><span className="hidden text-sm text-muted-foreground sm:block">{guestRows ? guestName : account.data?.profile?.full_name} · Receptionist</span>{!guestRows && <Button variant="outline" size="sm" onClick={signOut}><LogOut />Sign out</Button>}</div>
       </header>
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-8">
         {!approved ? (
